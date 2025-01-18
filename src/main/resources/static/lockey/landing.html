@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In / Log In</title>
+    <script src="landing.js"></script>
+    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        h2 {
+            color: var(--charcoal);
+            margin-bottom: 1.25rem; /* 20px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .sign-in-link {
+            font-size: 0.875rem; /* 14px */
+            color: #00796b; /* Teal color */
+            text-decoration: none;
+            cursor: pointer;
+            position: absolute;
+            right: 0;
+        }
+        .sign-in-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Media query for mobile devices */
+        @media (max-width: 37.5rem) { /* 600px */
+            .container {
+            width: 75vw; /* Adjusted width for mobile */
+            padding: 1rem; /* Adjusted padding for mobile */
+            }
+            input[type="text"], input[type="password"] {
+            width: 90%; /* Adjusted width for mobile */
+            }
+            .button-container {
+            flex-direction: column;
+            align-items: center;
+            }
+            button {
+            width: 90%; /* Adjusted width for mobile */
+            margin-bottom: 0.625rem; /* 10px */
+            }
+            .sign-in-link {
+            margin-top: 0.625rem; /* 10px */
+            position: static;
+            }
+            h2 {
+            font-size: 1.5rem; /* Adjusted font size for mobile */
+            }
+            form {
+            width: 100%; /* Adjusted width for mobile */
+            }
+        }
+    </style>
+</head>
+<body id="body">
+    <div class="container">
+        <h2>
+            <i class="fa-solid fa-key fa-sm" style="color: #234b50; margin-right: 0.5vw;"></i>
+            LocKey
+        </h2>
+        <form>
+            <input type="text" placeholder="Username" id="usernameField" class="light">
+            <input type="password" placeholder="PIN" id="pinField" class="light">
+            <div class="button-container">
+                <button id="logInBtn" class="bigBtn tanBtn">Log In</button>
+                <a class="sign-in-link" id="signInBtn">Sign In</a>
+            </div>
+        </form>
+        <a href = "/landing.html">(back to home)</a>
+    </div>
+</body>
+</html>

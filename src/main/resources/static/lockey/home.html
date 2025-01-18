@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<head>
+    <title>HOME</title>
+    <script src="home.js"></script>
+    <script src="Credentials.js"></script>
+    <!--https://www.canva.com/colors/color-palettes/a-warm-cup/-->
+    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        #pinnedBody, #normalBody {
+            padding: 1vh 1vw;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        hr {
+            color: lightgray;
+        }
+        .line {
+            width: 100vw;
+            height: fit-content;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .line > span {
+            border-top-style: solid;
+            border-top-width: 1px;
+            border-top-color: var(--desertSun);
+            width: 100%;
+        }
+        .line > :nth-child(1) {
+            width: 2vw;
+        }
+        .line > p {
+            color: var(--desertSun);
+            white-space: nowrap;
+            margin: 0px 1vw;
+        }
+
+        .bubble {
+            margin: 1.7vh 1vw;
+            padding: 1.5vh 1.2vw;
+            border-radius: 0.5rem;
+            border-style: solid;
+            border-width: 0.1rem;
+            border-color: var(--tan);
+            background-color: var(--ivory);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .bubble > h3 {
+            margin: 0;
+        }
+        .bubble > h3 > a {
+            color: var(--charcoal);
+            text-decoration: none;
+        }
+
+        .floatingButton {
+            position: fixed;
+            bottom: 2vh;
+            right: 2vw;
+            width: 1.5em;
+            height: 1.5em;
+            border-radius: 50%;
+            background-color: var(--charcoal);
+            color: var(--ivory);
+            font-size: 1.9rem;
+            border: none;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        #accountDiv {
+            display: none;
+            position: absolute;
+            top: 6vh;
+            right: 2vw;
+            padding: 1vh 1vw;
+            border-style: solid;
+            border-width: 1px;
+            border-color: var(--tan);
+            background-color: var(--ivory);
+            color: var(--charcoal);
+            font-size: medium;
+            width: 18vw;
+        }
+        #accountDiv > p {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 600px) {
+            .line {
+            flex-direction: column;
+            align-items: flex-start;
+            }
+            .line > :nth-child(1) {
+            width: 100%;
+            }
+            .line > p {
+            margin: 1vh 0;
+            }
+            .bubble {
+            width: 100%;
+            margin: 1vh 0;
+            }
+            #accountDiv {
+            width: 80vw;
+            right: 10vw;
+            }
+            .floatingButton {
+            width: 2.5em;
+            height: 2.5em;
+            font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <section id="back">
+            <i class="fa-solid fa-key fa-lg" style="color: var(--ivory);"></i>
+            LocKey
+        </section>
+        <button id="accountBtn" class="smallBtn tanBtnNoHover">
+            <i class="fa-solid fa-user fa-xl" style="color: var(--tan);"></i>
+        </button>
+        <div id="accountDiv">
+            <p>Username</p>
+            <input type="text" id="accountUsernameField" class="light">
+            <p>Pin</p>
+            <input type="text" id="accountPinField" class="light">
+            <button id="accountSaveBtn" class="bigBtn tanBtn">Save</button>
+        </div>
+    </nav>
+    <div id="pinnedBody">
+        <section class="line">
+            <span></span>
+            <p>Pinned</p>
+            <span></span>
+        </section>
+    </div>
+    <div id="normalBody">
+        <section class="line">
+            <span></span>
+            <p>Not pinned</p>
+            <span></span>
+        </section>
+    </div>
+    <button id="addBubbleButton" class="floatingButton">+</button>
+</body>
+</html>

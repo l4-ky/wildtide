@@ -1,0 +1,135 @@
+:root {
+    --charcoal: #234B50;
+    --ivory: #EAECE0;
+    --desertSun: #734330;
+    --tan: #DC9750;
+    --backIvory: #eaece0d7;
+    
+    --softGray: #B0B3B7;
+    --slateGray: #6c767f;
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--backIvory);
+    color: var(--charcoal);
+}
+#body {
+    background-color: var(--backIvory);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 95vh;
+    margin: 0;
+}
+#edit > #body {
+    align-items: unset;
+    height: unset;
+}
+
+.container {
+    background-color: var(--ivory);
+    padding: 1.25rem; /* 20px */
+    border-radius: 0.5rem; /* 8px */
+    box-shadow: 0 0 0.625rem rgba(0, 0, 0, 0.1); /* 10px */
+    width: 18.75rem; /* 300px */
+    text-align: center;
+}
+
+.navbar {
+    font-size: x-large;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--ivory);
+    background-color: var(--desertSun);
+    padding: 1vh 2vw;
+    min-height: 5vh;
+}
+.navbar a {
+    color: var(--ivory);
+    text-decoration: none;
+    padding: 1vh 2vw;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s;
+}
+.navbar a:hover {
+    background-color: var(--tan);
+}
+
+input[type="text"], input[type="password"] {
+    width: 80%; /* Adjusted width */
+    padding: 0.625rem; /* 10px */
+    margin: 0.3rem 0; /* 10px */
+    border: 0.0625rem solid; /* 1px */
+    color: var(--slateGray);
+    background-color: var(--ivory);
+    border-radius: 0.25rem; /* 4px */
+    outline: none;
+}
+
+.smallBtn {
+    font-size: 0.8rem;
+    min-width: fit-content;
+    width: 3vw;
+    height: 3.7vh;
+    padding: 0.2rem;
+    margin: 0.2rem;
+    border-style: solid;
+    border-width: 0.1rem;
+    border-radius: 0.2rem;
+    background-color: var(--ivory);
+    cursor: pointer;
+}
+.lightBtn {
+    border-color: var(--softGray);
+    color: var(--softGray);
+}
+.darkBtn {
+    border-color: var(--charcoal);
+    color: var(--charcoal);
+}
+
+.bigBtn {
+    display: inline-block;
+    font-size: 0.9rem;
+    min-width: fit-content;
+    width: 10vw;
+    height: 4vh;
+    padding: 0.625rem;
+    margin: 0.25rem;
+    border-style: solid;
+    border-width: 0.1rem;
+    border-radius: 0.25rem;
+    background-color: var(--ivory);
+    cursor: pointer;
+}
+.blueBtn {
+    border-color: var(--charcoal);
+    color: var(--charcoal);
+}
+.blueBtn:hover {
+    background-color: var(--charcoal);
+    color: var(--ivory);
+}
+.tanBtnNoHover {
+    border-color: var(--tan);
+    color: var(--tan);
+}
+.tanBtn {
+    border-color: var(--tan);
+    color: var(--tan);
+}
+.tanBtn:hover {
+    background-color: var(--tan);
+    color: var(--ivory);
+}
+.desertSunBtn {
+    border-color: var(--desertSun);
+    color: var(--desertSun);
+}
+.desertSunBtn:hover {
+    background-color: var(--desertSun);
+    color: var(--ivory);
+}

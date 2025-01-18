@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<head>
+    <title>HOME</title>
+    <script src="edit.js"></script>
+    <script src="Credentials.js"></script>
+    <link rel="stylesheet" href="css.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        #pinnedBody, #normalBody {
+            padding: 1vh 1vw;
+            display: flex;
+        }
+
+        .bubble {
+            min-width: fit-content;
+            padding: 1vh 2vw;
+            border-radius: 0.5rem;
+            border-style: solid;
+            border-width: 0.1rem;
+            border-color: var(--tan);
+            margin: 2.6vh 1vw;
+            background-color: var(--ivory);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .bubble > * {
+            align-items: center;
+        }
+        .bubble > #headerDiv {
+            display: flex;
+            justify-content: space-between;
+        }
+        .bubble > #fieldsDiv {
+            display: flex;
+            flex-direction: column;            
+        }
+        .bubble > #footerDiv {
+            display: flex;
+            justify-content: space-between;
+        }
+        .bubblePiece {
+            margin: 0.4rem;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .bubblePiece > :first-child {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .inputAsH2 {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--charcoal);
+            border: none;
+            background: transparent;
+            padding: 0.5em 0;
+            outline: none;
+        }
+
+        @media (max-width: 600px) {
+            .bubble {
+            padding: 1vh 1vw;
+            margin: 1.3vh 0.5vw;
+            }
+            .inputAsH2 {
+            font-size: 1.2em;
+            }
+            .bigBtn, .smallBtn {
+            font-size: 0.8em;
+            padding: 0.5em 1em;
+            }
+        }
+    </style>
+</head>
+<body id="edit">
+    <nav class="navbar">
+        <section>
+            <i class="fa-solid fa-key fa-lg" style="color: var(--ivory);"></i>
+            LocKey
+        </section>
+    </nav>
+    <div id="body">
+        <section class="bubble">
+            <section id="headerDiv">
+                <h2><input class="inputAsH2" id="nameField" placeholder="Name" value=""></h2>
+                <button id="isPinnedBtn" class="smallBtn blueBtn darkBtn">Not pinned</button>
+            </section>
+            <br>
+            <section id="fieldsDiv">
+                <!-- automatically generated fields and '+' button -->
+            </section>
+            <br>
+            <section id="footerDiv">
+                <button id="discardBtn" class="bigBtn blueBtn">Back (Discard changes)</button>
+                <button id="saveBtn" class="bigBtn tanBtn">Save changes</button>
+                <span style="width: 1.5vw;"></span>
+                <button id="deleteBtn" class="bigBtn desertSunBtn">Delete</button>
+            </section>
+        </section>
+    </div>
+</body>
+</html>
