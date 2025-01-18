@@ -1,0 +1,14 @@
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    padding: 2vh 3vw;
+    margin: 1vh 0;
+    background-color: bisque;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+}

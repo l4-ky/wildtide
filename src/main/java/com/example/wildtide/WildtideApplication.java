@@ -9,3 +9,8 @@ public class WildtideApplication {
 		SpringApplication.run(WildtideApplication.class, args);
 	}
 }
+
+/*
+ * open cmd from .jar target folder, then
+ * scp * ciro@192.168.1.30:/home/ciro/Desktop/Wildtide/wildtide
+ */
