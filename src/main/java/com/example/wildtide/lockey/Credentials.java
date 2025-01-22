@@ -1,15 +1,15 @@
-package com.example.wildtide;
+package com.example.wildtide.lockey;
 import java.util.ArrayList;
 import java.io.Serializable;
 
-public class Lockey_Credentials implements Serializable {
+public class Credentials implements Serializable {
     private static final long serialVersionUID = 1L;
     private String name;
     private ArrayList<String> topFields;
     private ArrayList<String> bottomFields;
     private boolean isPinned;
 
-    public Lockey_Credentials(String name, ArrayList<String> fields1, ArrayList<String> fields2, boolean isPinned) {
+    public Credentials(String name, ArrayList<String> fields1, ArrayList<String> fields2, boolean isPinned) {
         this.name=name;
         topFields=fields1;
         bottomFields=fields2;
@@ -53,8 +53,8 @@ public class Lockey_Credentials implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (this==obj) return true;
-        if (obj instanceof Lockey_Credentials) {
-            Lockey_Credentials temp=(Lockey_Credentials) obj;
+        if (obj instanceof Credentials) {
+            Credentials temp=(Credentials) obj;
             if (!this.getName().equals(temp.getName())) return false;
             if (this.topFields.size()!=temp.topFields.size()) return false;
             for (String field1:this.topFields) {

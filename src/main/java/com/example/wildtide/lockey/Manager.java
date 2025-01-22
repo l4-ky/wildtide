@@ -1,4 +1,4 @@
-package com.example.wildtide;
+package com.example.wildtide.lockey;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 
-public class Lockey_Manager {
+public class Manager {
     private static String filesPath="files/";
 
     public static void initStartup() {
@@ -69,9 +69,9 @@ public class Lockey_Manager {
         return pin.equals(readPinOf(username));
     }
 
-    public static ArrayList<Lockey_Credentials> readContentOf(String username, String pin) throws IOException, ClassNotFoundException {
+    public static ArrayList<Credentials> readContentOf(String username, String pin) throws IOException, ClassNotFoundException {
         if (!validAccess(username, pin)) throw new RuntimeException("Pin is not correct. Files read permission denied.");
-        ArrayList<Lockey_Credentials> credentials=new ArrayList<Lockey_Credentials>();
+        ArrayList<Credentials> credentials=new ArrayList<Credentials>();
         //TEST
         File test = new File(filesPath+username+"Content.bin");
         if (test.length()==0) {
@@ -87,12 +87,12 @@ public class Lockey_Manager {
             } catch (EOFException e) {
                 e.printStackTrace();
                 fileInputStream.close();
-                return new ArrayList<Lockey_Credentials>();
+                return new ArrayList<Credentials>();
             }
             boolean flag=true;
             while (flag) {
                 try {
-                    credentials.add((Lockey_Credentials)objInStream.readObject());
+                    credentials.add((Credentials)objInStream.readObject());
                 } catch (EOFException e) {
                     flag=false;
                 }
@@ -111,19 +111,19 @@ public class Lockey_Manager {
         objOutStream.close();
     }
 
-    private static void writeContentOf(String username, ArrayList<Lockey_Credentials> list) throws IOException {
+    private static void writeContentOf(String username, ArrayList<Credentials> list) throws IOException {
         FileOutputStream fileOutputStream = new FileOutputStream(filesPath+username+"Content.bin", false);
         ObjectOutputStream objOutStream=new ObjectOutputStream(fileOutputStream);
-        for (Lockey_Credentials item:list) {
-            objOutStream.writeObject(new Lockey_Credentials(item.getName(), item.getTopFields(), item.getBottomFields(), item.isPinned()));
+        for (Credentials item:list) {
+            objOutStream.writeObject(new Credentials(item.getName(), item.getTopFields(), item.getBottomFields(), item.isPinned()));
         }
         fileOutputStream.close();
         objOutStream.close();
     }
 
-    public static void store(String username, String pin, Lockey_Credentials newContent) throws IOException, ClassNotFoundException {
+    public static void store(String username, String pin, Credentials newContent) throws IOException, ClassNotFoundException {
         if (!validAccess(username, pin)) throw new RuntimeException("Pin is not correct. Files storing permission denied.");
-        ArrayList<Lockey_Credentials> originalContent=readContentOf(username, pin);
+        ArrayList<Credentials> originalContent=readContentOf(username, pin);
         int index=indexOf(originalContent, newContent);
         if (index!=-1) {
             originalContent.set(index, newContent);
@@ -133,8 +133,8 @@ public class Lockey_Manager {
         writeContentOf(username, originalContent);
     }
 
-    private static int indexOf(ArrayList<Lockey_Credentials> list, Lockey_Credentials cred) {
-        for (Lockey_Credentials elem:list) {
+    private static int indexOf(ArrayList<Credentials> list, Credentials cred) {
+        for (Credentials elem:list) {
             if (elem.getName().equals(cred.getName())) {
                 return list.indexOf(elem);
             }
@@ -144,8 +144,8 @@ public class Lockey_Manager {
     
     public static void delete(String username, String pin, String name) throws ClassNotFoundException, IOException {
         if (!validAccess(username, pin)) throw new RuntimeException("Pin is not correct. Files deleting permission denied.");
-        ArrayList<Lockey_Credentials> originalContent=readContentOf(username, pin);
-        for (Lockey_Credentials act:originalContent) {
+        ArrayList<Credentials> originalContent=readContentOf(username, pin);
+        for (Credentials act:originalContent) {
             if (act.getName().equals(name)) {
                 originalContent.remove(act);
                 break;

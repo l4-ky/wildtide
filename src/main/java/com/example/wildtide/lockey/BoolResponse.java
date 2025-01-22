@@ -1,9 +1,9 @@
-package com.example.wildtide;
+package com.example.wildtide.lockey;
 
-public class Lockey_BoolResponse {
+public class BoolResponse {
     private boolean success;
     private String message;
-    public Lockey_BoolResponse(boolean success, String message) {
+    public BoolResponse(boolean success, String message) {
         this.success = success;
         this.message = message;
     }

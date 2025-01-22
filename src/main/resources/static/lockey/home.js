@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.getElementById('back').onclick=()=>{
         sessionStorage.removeItem('username');
         sessionStorage.removeItem('pin');
-        window.location.href = '/';
+        window.location.href = '/lockey/landing.html';
         sessionStorage.remove('editCred');
     }
     //
