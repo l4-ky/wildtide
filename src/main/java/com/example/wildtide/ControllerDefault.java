@@ -1,4 +1,4 @@
-package com.example.wildtide.lockey;
+package com.example.wildtide;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/")
-public class ControllerB {
+public class ControllerDefault {
     @GetMapping("")
     public ResponseEntity<Void> redirectToNewUrl() {
         HttpHeaders headers = new HttpHeaders();
