@@ -21,6 +21,9 @@ public class Player<Role> {
     public String getPlayerName() {
         return name;
     }
+    public void setPlayerName(String name) {
+        this.name=name;
+    }
 
     public Role getRole() {
         return role;

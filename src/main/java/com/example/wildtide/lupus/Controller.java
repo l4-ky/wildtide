@@ -1,7 +1,6 @@
 package com.example.wildtide.lupus;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -33,6 +32,7 @@ public class Controller {
     //PREP METHODS
     @OnOpen
     public boolean onOpen(Session session, @PathParam("username") String username) {
+        //TUTTO DA RIVEDERE, ASSEGNA LA SESSION AL THREAD E NON AL GAME
         Game x=getFromName(username);
         if (x!=null) {
             x.addPlayer(username);
@@ -67,6 +67,6 @@ public class Controller {
     //END OF PREP METHODS
 
     //IN-GAME METHODS
-    
+
     //END OF IN-GAME METHODS
 }
