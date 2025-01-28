@@ -8,7 +8,6 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/lupus/")
-@ServerEndpoint("/lupus/websocket/{username}")
+@ServerEndpoint("/lupus/{gameName}/{username}")
 public class Controller {
     private ArrayList<Game> gamesList=new ArrayList<Game>();
 
@@ -31,15 +30,29 @@ public class Controller {
 
     //PREP METHODS
     @OnOpen
-    public boolean onOpen(Session session, @PathParam("username") String username) {
-        //TUTTO DA RIVEDERE, ASSEGNA LA SESSION AL THREAD E NON AL GAME
-        Game x=getFromName(username);
+    public boolean onOpen(Session session, @PathParam("gameName") String gameName, @PathParam("username") String username) {
+        Game x=getFromName(gameName);
         if (x!=null) {
             x.addPlayer(username);
             return true;
         } else {
             return false;
         } 
+    }
+
+    @PostMapping("testUsername")
+    public boolean testUsername(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
+		if(username==null || username.isEmpty() || username.matches("^[^a-zA-Z0-9_]*$") || username.contains(" ")) {
+			return false;
+		} else {
+			for (Game game:gamesList) {
+                if (!game.getGameName().equals(gameName)) break;
+				for (String name:game.getNamePlayersList()) {
+                    if (name.equals(username)) return false;
+                }
+			}
+		}
+		return true;
     }
 
     @PostMapping("newGame")
@@ -57,11 +70,11 @@ public class Controller {
         return true;
     }
 
-    @PutMapping("startGame/{gameName}")
+    @PostMapping("startGame/{gameName}")
     public void startGame(@PathParam("gameName") String gameName, @RequestHeader("Username") String username) {
         Game askedToStart=getFromName(username);
-        if (askedToStart.getWhoStarted().equals(username)) {
-            askedToStart.run();
+        if (askedToStart.getWhoStarted().equals(username) && askedToStart.getNamePlayersList().size()>=8) {
+            askedToStart.start();
         }
     }
     //END OF PREP METHODS
