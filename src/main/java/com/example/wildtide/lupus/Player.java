@@ -8,10 +8,15 @@ public class Player<Role> {
     private Session session;
     private String name;
     private Role role;
+    private boolean isProtected;
 
     public Player(String name, Role role) {
         this.name=name;
         this.role=role;
+    }
+
+    public void sendMessage(String message) {
+        //
     }
 
     public void setSession(Session session) {
@@ -27,5 +32,12 @@ public class Player<Role> {
 
     public Role getRole() {
         return role;
+    }
+
+    public void setIsProtected(boolean x) {
+        this.isProtected=x;
+    }
+    public boolean getIsProtected() {
+        return isProtected;
     }
 }

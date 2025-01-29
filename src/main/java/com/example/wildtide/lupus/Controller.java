@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 @RestController
@@ -80,6 +84,13 @@ public class Controller {
     //END OF PREP METHODS
 
     //IN-GAME METHODS
-
+    @PutMapping("choice/{gameName}/guardia")
+    public void guardiaChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+        try {
+            getFromName(gameName).getQueue().put(chosenPlayer);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
     //END OF IN-GAME METHODS
 }

@@ -3,32 +3,52 @@ package com.example.wildtide.lupus;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class Game extends Thread{
     private String gameName;
     private boolean hasStarted=false;
     private boolean hasEnded=false;
+    private int numeroNotte=0;
     private ArrayList<String> namePlayersList=new ArrayList<String>();
     private ArrayList<Player<?>> playersList=new ArrayList<Player<?>>();
+    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
 
     public Game(String name) {
         this.gameName=name;
     }
 
     @Override
-    public void run() {
+    public void run(){
         hasStarted=true;
         assignRoles();
-
         while (!hasEnded) {
 
         //-----NOTTE-----
         //"E' notte, chiudete tutti gli occhi"
-
+        messageToList(playersList, "E' notte, chiudete tutti gli occhi!");
+        
         //Guardia del corpo
         //ogni notte protegge una persona a sua scelta.
         //dalla seconda notte in poi (prima della fase dei lupi mannari) il moderatore chiama la Guardia del corpo e questi gli indica una persona a scelta (no se stesso) che è protetta dai lupi mannari.
         //se quella persona è poi scelta anche dai lupi mannari come vittima, non muore e nella fase della notte nessuno è sbranato.
+        if (numeroNotte!=0) {
+            @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
+            Player<Guardia> guardia=(Player<Guardia>)getOfType(new Player<Guardia>("", new Guardia())).getFirst();
+            if (guardia!=null) {
+                messageToList(getOfType(new Player<Guardia>("", new Guardia())), "Guardia del corpo, apri gli occhi!\nChi vuoi proteggere questa notte?");
+                try {
+                    String chosenPlayerName=queue.take();
+                    //CONTROLLARE CHE NON SIA SE STESSO, ATTRAVERSO IL NOME DEL Player TROVATO E QUELLO RICEVUTO DALLA Queue
+                    Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                    chosenPlayer.setIsProtected(true);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                messageToList(getOfType(new Player<Guardia>("", new Guardia())), "Guardia del corpo, chiudi gli occhi!");
+            }
+        }
 
         //"Il veggente apre gli occhi e sceglie una persona"
         //Veggente sceglie e ottiene esito lupo/no (fase giocata anche se il veggente è morto(fantasma))
@@ -116,14 +136,14 @@ public class Game extends Thread{
         }
     }
 
-    /* private Player getFromName(String name) {
-        for (Player player:playersList) {
+    private Player<?> getFromName(String name) {
+        for (Player<?> player:playersList) {
             if (player.getPlayerName().equals(name)) {
                 return player;
             }
         }
         return null;
-    } */
+    }
 
     public boolean addPlayer(String username) {
         if (namePlayersList.size()>=24) return false;//limite di 24 giocatori
@@ -132,6 +152,22 @@ public class Game extends Thread{
             return true;
         }
         return false;
+    }
+
+    private void messageToList(ArrayList<Player<?>> list, String message) {
+        for (Player<?> player:list) {
+            player.sendMessage(message);
+        }
+    }
+
+    private ArrayList<Player<?>> getOfType(Player<?> type) {
+        ArrayList<Player<?>> list=new ArrayList<>();
+        for (Player<?> player:playersList) {
+            if (player.getRole().getClass().equals(type.getRole().getClass())) {
+                list.add(player);
+            }
+        }
+        return list;
     }
 
     public String getGameName() {
@@ -148,5 +184,9 @@ public class Game extends Thread{
 
     public ArrayList<String> getNamePlayersList() {
         return namePlayersList;
+    }
+
+    public BlockingQueue<String> getQueue() {
+        return queue;
     }
 }
