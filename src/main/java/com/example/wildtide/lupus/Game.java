@@ -27,7 +27,7 @@ public class Game extends Thread{
 
         //-----NOTTE-----
         //"E' notte, chiudete tutti gli occhi"
-        messageToList(playersList, "E' notte, chiudete tutti gli occhi!");
+        messageTo(playersList, "E' notte, chiudete tutti gli occhi!");
         
         //Guardia del corpo
         //ogni notte protegge una persona a sua scelta.
@@ -37,24 +37,54 @@ public class Game extends Thread{
             @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
             Player<Guardia> guardia=(Player<Guardia>)getOfType(new Player<Guardia>("", new Guardia())).getFirst();
             if (guardia!=null) {
-                messageToList(getOfType(new Player<Guardia>("", new Guardia())), "Guardia del corpo, apri gli occhi!\nChi vuoi proteggere questa notte?");
+                messageTo(guardia, "Guardia del corpo, apri gli occhi!\nChi vuoi proteggere questa notte?");
                 try {
                     String chosenPlayerName=queue.take();
-                    //CONTROLLARE CHE NON SIA SE STESSO, ATTRAVERSO IL NOME DEL Player TROVATO E QUELLO RICEVUTO DALLA Queue
-                    Player<?> chosenPlayer=getFromName(chosenPlayerName);
-                    chosenPlayer.setIsProtected(true);
+                    //controllo ridondante, ma da mantenere per sicurezza. in teoria il sito non deve permettere alla Guardia di scegliere se stessa
+                    if (!chosenPlayerName.equals(guardia.getPlayerName())) {
+                        Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                        chosenPlayer.setIsProtected(true);
+                    } else {
+                        messageTo(guardia, "[Non è possibile proteggere se stessi.]");
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                messageToList(getOfType(new Player<Guardia>("", new Guardia())), "Guardia del corpo, chiudi gli occhi!");
+                messageTo(getOfType(new Player<Guardia>("", new Guardia())), "Guardia del corpo, chiudi gli occhi!");
             }
         }
-
+        
         //"Il veggente apre gli occhi e sceglie una persona"
         //Veggente sceglie e ottiene esito lupo/no (fase giocata anche se il veggente è morto(fantasma))
         //(possono essere due se il mitomane è diventato veggente; il veggente vede il mitomane-lupo mannaro come un lupo mannaro)
         //"Il veggente chiude gli occhi"
         //[7-10 secondi]
+        ArrayList<Player<?>> veggenti=getOfType(new Player<Veggente>("", new Veggente()));//se serve, fare il casting a 'Player<Veggente>' nell'interazione. così si rendono accessibili i metodi del 'role'
+        messageTo(veggenti, "Veggente, apri gli occhi!\n Scegli una persona di cui scoprire il ruolo.");
+        try {
+            boolean areAllGhosts=false;
+            for (Player<?> veggente:veggenti) {
+                if (!veggente.getIsGhost()) areAllGhosts=true;
+            }
+            if (!areAllGhosts) {
+                String chosenPlayerName=queue.take();
+                //still, controllo ridondante ma da mantenere per sicurezza sicurezza
+                if (!isNameInList(veggenti, chosenPlayerName)) {
+                    String chosenPlayerRoleName=getFromName(chosenPlayerName).getRole().getRoleName();
+                    for (Player<?> veggente:veggenti) {
+                        if (!veggente.getIsGhost()) {
+                            messageTo(veggente, chosenPlayerRoleName);
+                        }
+                    }
+                } else {
+                    messageTo(veggenti, "[Non è possibile conoscere il ruolo di se stessi o di un altro veggente.]");
+                }
+            } else {
+                Thread.sleep(5000);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         //"I lupi mannari aprono gli occhi e scelgono una persona da sbranare"
         //i Lupi si riconoscono e scelgono chi sbaranare (votazione: scelta comune, oppure scelta per maggioranza a fine tempo)
@@ -145,6 +175,15 @@ public class Game extends Thread{
         return null;
     }
 
+    private boolean isNameInList(ArrayList<Player<?>> list, String name) {
+        for (Player<?> player:list) {
+            if (player.getPlayerName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean addPlayer(String username) {
         if (namePlayersList.size()>=24) return false;//limite di 24 giocatori
         if (!namePlayersList.contains(username)) {
@@ -154,10 +193,18 @@ public class Game extends Thread{
         return false;
     }
 
-    private void messageToList(ArrayList<Player<?>> list, String message) {
+    private void messageTo(Player<?> x, String m) {
+        messageTo(new ArrayList<Player<?>>(Arrays.asList(x)), m);
+    }
+    private void messageTo(ArrayList<Player<?>> list, String message) {
+        message="[Moderatore]: "+message;//eventualmente modificare il prefisso del messaggio (che qui è "[Moderatore]") per essere elaborato dal sito per essere visualizzato come desiderato (ex. per mettere in grassetto/colorato il nome del mittente)
         for (Player<?> player:list) {
             player.sendMessage(message);
         }
+    }
+
+    private void redirectToAll() {
+        //
     }
 
     private ArrayList<Player<?>> getOfType(Player<?> type) {

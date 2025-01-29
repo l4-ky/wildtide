@@ -9,6 +9,7 @@ public class Player<Role> {
     private String name;
     private Role role;
     private boolean isProtected;
+    private boolean isGhost;
 
     public Player(String name, Role role) {
         this.name=name;
@@ -16,7 +17,7 @@ public class Player<Role> {
     }
 
     public void sendMessage(String message) {
-        //
+        //TO DO
     }
 
     public void setSession(Session session) {
@@ -34,10 +35,17 @@ public class Player<Role> {
         return role;
     }
 
-    public void setIsProtected(boolean x) {
-        this.isProtected=x;
-    }
     public boolean getIsProtected() {
         return isProtected;
+    }
+    public void setIsProtected(boolean isProtected) {
+        this.isProtected=isProtected;
+    }
+
+    public boolean getIsGhost() {
+        return isGhost;
+    }
+    public void setIsGhost(boolean isGhost) {
+        this.isGhost = isGhost;
     }
 }

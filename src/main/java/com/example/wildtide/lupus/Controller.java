@@ -92,5 +92,14 @@ public class Controller {
             e.printStackTrace();
         }
     }
+    
+    @PutMapping("choice/{gameName}/veggente")
+    public void veggenteChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+        try {
+            getFromName(gameName).getQueue().put(chosenPlayer);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
     //END OF IN-GAME METHODS
 }
