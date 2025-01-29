@@ -84,6 +84,7 @@ public class Controller {
     //END OF PREP METHODS
 
     //IN-GAME METHODS
+    //(i metodi 'choice' che non hanno alterazioni particolari si potrebbero unificare, hanno lo stesso corpo e svolgono la stessa funzione)
     @PutMapping("choice/{gameName}/guardia")
     public void guardiaChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
         try {
@@ -94,7 +95,16 @@ public class Controller {
     }
     
     @PutMapping("choice/{gameName}/veggente")
-    public void veggenteChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+    public void veggentiChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+        try {
+            getFromName(gameName).getQueue().put(chosenPlayer);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @PutMapping("choice/{gameName}/lupi")
+    public void lupiChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
         try {
             getFromName(gameName).getQueue().put(chosenPlayer);
         } catch (InterruptedException e) {

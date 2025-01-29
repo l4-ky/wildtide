@@ -60,11 +60,11 @@ public class Game extends Thread{
         //"Il veggente chiude gli occhi"
         //[7-10 secondi]
         ArrayList<Player<?>> veggenti=getOfType(new Player<Veggente>("", new Veggente()));//se serve, fare il casting a 'Player<Veggente>' nell'interazione. così si rendono accessibili i metodi del 'role'
-        messageTo(veggenti, "Veggente, apri gli occhi!\n Scegli una persona di cui scoprire il ruolo.");
+        messageTo(veggenti, "Veggenti, aprite gli occhi!\n Di chi si vuole scoprire il ruolo?");
         try {
-            boolean areAllGhosts=false;
+            boolean areAllGhosts=true;
             for (Player<?> veggente:veggenti) {
-                if (!veggente.getIsGhost()) areAllGhosts=true;
+                if (!veggente.getIsGhost()) areAllGhosts=false;
             }
             if (!areAllGhosts) {
                 String chosenPlayerName=queue.take();
@@ -73,23 +73,28 @@ public class Game extends Thread{
                     String chosenPlayerRoleName=getFromName(chosenPlayerName).getRole().getRoleName();
                     for (Player<?> veggente:veggenti) {
                         if (!veggente.getIsGhost()) {
-                            messageTo(veggente, chosenPlayerRoleName);
+                            messageTo(veggente, "Il giocatore che è stato osservato è un "+chosenPlayerRoleName);
                         }
                     }
                 } else {
                     messageTo(veggenti, "[Non è possibile conoscere il ruolo di se stessi o di un altro veggente.]");
                 }
             } else {
-                Thread.sleep(5000);
+                Thread.sleep(5000);//simulo l'esecuzione della fase
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        messageTo(veggenti, "Veggenti, chiudete gli occhi!");
+        
         //"I lupi mannari aprono gli occhi e scelgono una persona da sbranare"
         //i Lupi si riconoscono e scelgono chi sbaranare (votazione: scelta comune, oppure scelta per maggioranza a fine tempo)
         //"I lupi mannari chiudono gli occhi"
         //[15-20 secondi]
+        ArrayList<Player<?>> lupi=getOfType(new Player<Lupo>("", new Lupo()));
+        messageTo(lupi, "Lupi mannari, aprite gli occhi!\n Chi volete sbranare stanotte?");
+        
+        messageTo(lupi, "Lupi mannari, chiudete gli occhi!");
 
         //Medium
         //dalla seconda notte in poi, il moderatore chiama la sua fase e con un cenno del capo gli dice
