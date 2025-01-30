@@ -1,5 +1,7 @@
 package com.example.wildtide.lupus;
 
+import java.util.ArrayList;
+
 import javax.websocket.Session;
 
 public class Player<Role> {
@@ -27,8 +29,9 @@ public class Player<Role> {
         this.numeroNotteWhenKilled=oldPlayer.numeroNotteWhenKilled;
     }
 
-    public void sendMessage(String message) {
-        //TO DO
+    @SuppressWarnings("rawtypes")//just because
+    public void sendMessage(ArrayList toBeSent) {
+        session.getAsyncRemote().sendObject(toBeSent);
     }
 
     public void setSession(Session session) {

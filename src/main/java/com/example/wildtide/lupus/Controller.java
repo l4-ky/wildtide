@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-
-
 
 @RestController
 @RequestMapping("/lupus/")
@@ -120,5 +117,20 @@ public class Controller {
             e.printStackTrace();
         }
     }
+
+    @PutMapping("choice/{gameName}/indiziato")
+    public void indiziatoChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+        try {
+            getFromName(gameName).getQueue().put(chosenPlayer);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("rawtypes")//just because
+    @PostMapping("chat/{gameName}/{toWho}")
+    public void postMethodName(@PathParam("gameName") String gameName, @RequestBody ArrayList messageReceived) {
+        getFromName(gameName).redirectToAll(messageReceived);
+    }    
     //END OF IN-GAME METHODS
 }

@@ -99,10 +99,7 @@ public class Game extends Thread{
                 //still, controllo ridondante ma da mantenere per sicurezza sicurezza
                 if (!isNameInList(lupi, chosenPlayerName)) {
                     Player<?> chosenPlayer=getFromName(chosenPlayerName);
-                    chosenPlayer.setIsGhost(true);//viene sbranato
-                    chosenPlayer.setHasBeenKilledDuringNight(true);
-                    chosenPlayer.setNumeroNotteWhenKilled(numeroNotte);
-                    ghosts.add(chosenPlayer);//aggiunto alla lista cronologica dei giocatori morti
+                    killPlayer(chosenPlayer, true);
                 } else {
                     messageTo(lupi, "[Non è possibile sbranare se stessi o un altro lupo.]");
                 }
@@ -203,8 +200,27 @@ public class Game extends Thread{
             //i due giocatori indiziati possono difendersi con un ultimo breve discorso (20 secondi a testa)
             //poi i giocatori non indiziati e ancora vivi (esclusi quindi gli indiziati e i fantasmi) votano di nuovo il giocatore tra gli indiziati che verrà linciato.
             //chi ha preso più voti è linciato e diventa un fantasma (se parità, indice più basso)
+            try {
+                Player<?> votedPlayer=getFromName(queue.take());
+                if (!votedPlayer.getIsProtected()) {
+                    killPlayer(votedPlayer, false);
+                    messageTo(playersList, "Il giocatore '"+votedPlayer.getPlayerName()+"' è stato linciato!");
+                    messageTo(votedPlayer, "A partire da ora giocherai come Fantasma: dovrai astenerti dai commenti e non potrai parlare per il resto della partita.");
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-            //(check se umani hanno vinto)
+            //se non ci sono più lupi vivi, gli umani hanno vinto
+            ArrayList<Player<?>> lupiInGame=getOfType(new Player<Lupo>("", new Lupo()));
+            boolean areThereLupiAlive=false;
+            for (Player<?> lupo:lupiInGame) {
+                if (lupo.getIsGhost()) areThereLupiAlive=true;
+            }
+            if (areThereLupiAlive) {
+                hasEnded=true;
+                haveLupiWon=false;
+            }
 
             //a questo punto il giorno è terminato: si ricomincia con una nuova notte e così via, finché una fazione non vince.
         }
@@ -280,18 +296,35 @@ public class Game extends Thread{
         return false;
     }
 
-    private void messageTo(Player<?> x, String m) {
-        messageTo(new ArrayList<Player<?>>(Arrays.asList(x)), m);
+    private void updater(ArrayList<Player<?>> list, String message, int paramCode) {
+        //TO DO
     }
+
+    private void messageTo(Player<?> x, String m) {
+        messageTo(x, m, 200);
+    }
+    private void messageTo(Player<?> x, String m, int paramCode) {
+        messageTo(new ArrayList<Player<?>>(Arrays.asList(x)), m, paramCode);
+    }
+
     private void messageTo(ArrayList<Player<?>> list, String message) {
+        messageTo(list, message, 200);
+    }
+    private void messageTo(ArrayList<Player<?>> list, String message, int paramCode) {
         message="[Moderatore]: "+message;//eventualmente modificare il prefisso del messaggio (che qui è "[Moderatore]") per essere elaborato dal sito per essere visualizzato come desiderato (ex. per mettere in grassetto/colorato il nome del mittente)
+        @SuppressWarnings({ "unchecked", "rawtypes" })//just because. sono consapevole della non tipizazzione della lista
+        ArrayList listToBeSent=new ArrayList(Arrays.asList(paramCode, message));
         for (Player<?> player:list) {
-            player.sendMessage(message);
+            player.sendMessage(listToBeSent);
         }
     }
 
-    private void redirectToAll() {
-        //
+    @SuppressWarnings("rawtypes")//just because
+    public void redirectToAll(ArrayList toBeSent) {
+        //stacca thread che esegue il for qui sotto
+        for (Player<?> player:playersList) {
+            player.sendMessage(toBeSent);
+        }
     }
 
     private ArrayList<Player<?>> getOfType(Player<?> type) {
@@ -330,6 +363,13 @@ public class Game extends Thread{
         int pos=playersList.indexOf(mitomane);
         playersList.remove(pos);
         playersList.add(pos, villico);
+    }
+
+    private void killPlayer(Player<?> player, boolean hasBeenKilledDuringNight) {
+        player.setIsGhost(true);//viene sbranato
+        player.setHasBeenKilledDuringNight(hasBeenKilledDuringNight);
+        player.setNumeroNotteWhenKilled(numeroNotte);
+        ghosts.add(player);//aggiunto alla lista cronologica dei giocatori morti
     }
 
     public String getGameName() {
