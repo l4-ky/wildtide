@@ -32,10 +32,15 @@ public class Controller {
     //PREP METHODS
     @OnOpen
     public boolean onOpen(Session session, @PathParam("gameName") String gameName, @PathParam("username") String username) {
-        Game x=getFromName(gameName);
-        if (x!=null) {
-            x.addPlayer(username);
-            return true;
+        Game gameFound=getFromName(gameName);
+        if (gameFound!=null) {
+            Player<?> playerFound=gameFound.getFromName(username);
+            if (playerFound!=null) {
+                playerFound.setSession(session);
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         } 
@@ -129,8 +134,8 @@ public class Controller {
 
     @SuppressWarnings("rawtypes")//just because
     @PostMapping("chat/{gameName}/{toWho}")
-    public void postMethodName(@PathParam("gameName") String gameName, @RequestBody ArrayList messageReceived) {
-        getFromName(gameName).redirectToAll(messageReceived);
-    }    
+    public void redirectMessage(@PathParam("gameName") String gameName, @PathParam("toWho") String toWho, @RequestHeader("Username") String senderName, @RequestBody ArrayList messageReceived) {
+        getFromName(gameName).redirect(toWho, senderName, messageReceived);
+    }
     //END OF IN-GAME METHODS
 }

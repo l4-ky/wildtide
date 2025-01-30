@@ -11,7 +11,7 @@ public class Game extends Thread{
     private ArrayList<String> namePlayersList=new ArrayList<String>();
     //
     private ArrayList<Player<?>> playersList=new ArrayList<Player<?>>();
-    private BlockingQueue<String> queue = new ArrayBlockingQueue<>(1);
+    private BlockingQueue<String> queue/* =new ArrayBlockingQueue<>(1) */;
     private boolean hasStarted=false;
     private boolean hasEnded=false;
     private boolean haveLupiWon=false;
@@ -26,6 +26,8 @@ public class Game extends Thread{
     public void run(){
         hasStarted=true;
         assignRoles();
+        queue= new ArrayBlockingQueue<>(playersList.size());
+        //TO DO: rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
         while (!hasEnded) {
             numeroNotte++;
 
@@ -38,7 +40,7 @@ public class Game extends Thread{
             //se quella persona è poi scelta anche dai lupi mannari come vittima, non muore e nella fase della notte nessuno è sbranato.
             if (numeroNotte>1) {
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
-                Player<Guardia> guardia=(Player<Guardia>)getOfType(new Player<Guardia>("", new Guardia())).getFirst();
+                Player<Guardia> guardia=(Player<Guardia>)getOfRole("Guardia").getFirst();
                 if (guardia!=null) {
                     messageTo(playersList, "Guardia del corpo, apri gli occhi!\nChi vuoi proteggere questa notte?");
                     try {
@@ -61,7 +63,7 @@ public class Game extends Thread{
             //il Veggente sceglie e ottiene esito lupo/no (fase giocata anche se il veggente è morto(fantasma))
             //(possono essere due se il mitomane è diventato veggente; il veggente vede il mitomane-lupo mannaro come un lupo mannaro)
             //[7-10 secondi]
-            ArrayList<Player<?>> veggenti=getOfType(new Player<Veggente>("", new Veggente()));//se serve, fare il casting a 'Player<Veggente>' nell'interazione. così si rendono accessibili i metodi del 'role'
+            ArrayList<Player<?>> veggenti=getOfRole("Veggente");//se serve, fare il casting a 'Player<Veggente>' nell'interazione. così si rendono accessibili i metodi del 'role'
             messageTo(playersList, "Veggenti, aprite gli occhi!\n Di chi si vuole scoprire il ruolo?");
             try {
                 boolean areAllGhosts=true;
@@ -72,7 +74,7 @@ public class Game extends Thread{
                     String chosenPlayerName=queue.take();
                     //still, controllo ridondante ma da mantenere per sicurezza sicurezza
                     if (!isNameInList(veggenti, chosenPlayerName)) {
-                        String chosenPlayerRole=getFromName(chosenPlayerName).getRole().getClass().toString();
+                        String chosenPlayerRole=getFromName(chosenPlayerName).getRole().getClass().getSimpleName();
                         for (Player<?> veggente:veggenti) {
                             if (!veggente.getIsGhost()) {
                                 messageTo(veggente, "Il giocatore che è stato osservato è un "+chosenPlayerRole);
@@ -92,7 +94,7 @@ public class Game extends Thread{
             //Lupi mannari
             //i Lupi si riconoscono e scelgono chi sbaranare (votazione: scelta comune, oppure scelta per maggioranza a fine tempo, oppure nessuno)
             //[15-20 secondi]
-            ArrayList<Player<?>> lupi=getOfType(new Player<Lupo>("", new Lupo()));
+            ArrayList<Player<?>> lupi=getOfRole("Lupo");
             messageTo(playersList, "Lupi mannari, aprite gli occhi!\n Chi volete sbranare stanotte?");
             try {
                 String chosenPlayerName=queue.take();
@@ -113,7 +115,7 @@ public class Game extends Thread{
             //“sì” se la persona linciata nel turno precedente era un lupo mannaro, “no” altrimenti.
             if (numeroNotte>1) {
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
-                Player<Medium> medium=(Player<Medium>)getOfType(new Player<Medium>("", new Medium())).getFirst();
+                Player<Medium> medium=(Player<Medium>)getOfRole("Medium").getFirst();
                 if (medium!=null) {
                     messageTo(playersList, "Medium, apri gli occhi!");
                     Player<?> killedLastNight=whoWaskilledLastNight(numeroNotte);
@@ -132,7 +134,7 @@ public class Game extends Thread{
             //altrimenti assume immediatamente il ruolo rispettivamente di lupo mannaro o di veggente, a tutti gli effetti.
             if (numeroNotte==2) {
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
-                Player<Mitomane> mitomane=(Player<Mitomane>)getOfType(new Player<Mitomane>("", new Mitomane())).getFirst();
+                Player<Mitomane> mitomane=(Player<Mitomane>)getOfRole("Mitomane").getFirst();
                 if (mitomane!=null) {
                     messageTo(playersList, "Mitomane, apri gli occhi!");
                     try {
@@ -157,7 +159,7 @@ public class Game extends Thread{
 
             //Massoni
             //sono due umani che conoscono reciprocamente il ruolo dell’altro. solo durante la prima notte il moderatore chiama anche i Massoni i quali aprono gli occhi e si riconoscono.
-            ArrayList<Player<?>> massoni=getOfType(new Player<Massone>("", new Massone()));
+            ArrayList<Player<?>> massoni=getOfRole("Massone");
             if (!massoni.isEmpty()) {
                 messageTo(playersList, "Massoni, aprite gli occhi!");
                 try {
@@ -189,7 +191,7 @@ public class Game extends Thread{
             }
             messageTo(killedLastNight, "A partire da ora giocherai come Fantasma: dovrai astenerti dai commenti e non potrai parlare per il resto della partita.");
             //se il numero di lupi è uguale alla somma dei numeri degli altri ruoli, allora hanno vinto i lupi
-            if (getOfType(new Player<Lupo>("", new Lupo())).size()==getOfType(new Player<Villico>("", new Villico())).size()+getOfType(new Player<Guardia>("", new Guardia())).size()+getOfType(new Player<Massone>("", new Massone())).size()+getOfType(new Player<Medium>("", new Medium())).size()+getOfType(new Player<Veggente>("", new Veggente())).size()) {
+            if (getOfRole("Lupo").size()==getOfRole("Villico").size()+getOfRole("Guardia").size()+getOfRole("Massone").size()+getOfRole("Medium").size()+getOfRole("Veggente").size()) {
                 hasEnded=true;
                 haveLupiWon=true;
             }
@@ -212,7 +214,7 @@ public class Game extends Thread{
             }
 
             //se non ci sono più lupi vivi, gli umani hanno vinto
-            ArrayList<Player<?>> lupiInGame=getOfType(new Player<Lupo>("", new Lupo()));
+            ArrayList<Player<?>> lupiInGame=getOfRole("Lupo");
             boolean areThereLupiAlive=false;
             for (Player<?> lupo:lupiInGame) {
                 if (lupo.getIsGhost()) areThereLupiAlive=true;
@@ -269,7 +271,7 @@ public class Game extends Thread{
         }
     }
 
-    private Player<?> getFromName(String name) {
+    public Player<?> getFromName(String name) {
         for (Player<?> player:playersList) {
             if (player.getPlayerName().equals(name)) {
                 return player;
@@ -311,26 +313,30 @@ public class Game extends Thread{
         messageTo(list, message, 200);
     }
     private void messageTo(ArrayList<Player<?>> list, String message, int paramCode) {
-        message="[Moderatore]: "+message;//eventualmente modificare il prefisso del messaggio (che qui è "[Moderatore]") per essere elaborato dal sito per essere visualizzato come desiderato (ex. per mettere in grassetto/colorato il nome del mittente)
-        @SuppressWarnings({ "unchecked", "rawtypes" })//just because. sono consapevole della non tipizazzione della lista
-        ArrayList listToBeSent=new ArrayList(Arrays.asList(paramCode, message));
+        @SuppressWarnings({ "unchecked", "rawtypes" })//just because. sono consapevole della non tipizzazione della lista
+        ArrayList listToBeSent=new ArrayList(Arrays.asList(paramCode, "Moderatore", message));
         for (Player<?> player:list) {
             player.sendMessage(listToBeSent);
         }
     }
 
     @SuppressWarnings("rawtypes")//just because
-    public void redirectToAll(ArrayList toBeSent) {
-        //stacca thread che esegue il for qui sotto
-        for (Player<?> player:playersList) {
+    public void redirect(String toWho, String senderName, ArrayList toBeSent) {
+        new Thread(() -> redirectInThread(toWho, senderName, toBeSent)).start();
+    }
+    @SuppressWarnings({ "rawtypes", "unchecked" })//just because
+    private void redirectInThread(String toWho, String senderName, ArrayList toBeSent) {
+        toBeSent.add(1,senderName);
+        ArrayList<Player<?>> playersFound=getOfRole(toWho);
+        for (Player<?> player:playersFound) {
             player.sendMessage(toBeSent);
         }
     }
 
-    private ArrayList<Player<?>> getOfType(Player<?> type) {
+    public ArrayList<Player<?>> getOfRole(String type) {
         ArrayList<Player<?>> list=new ArrayList<>();
         for (Player<?> player:playersList) {
-            if (player.getRole().getClass().equals(type.getRole().getClass())) {
+            if (player.getRole().getClass().getSimpleName().equals(type)) {
                 list.add(player);
             }
         }
