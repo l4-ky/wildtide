@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class Game extends Thread{
     private String gameName;
@@ -18,6 +19,13 @@ public class Game extends Thread{
     private int numeroNotte=0;
     private int numeroGiorno=0;
     private ArrayList<Player<?>> ghosts=new ArrayList<Player<?>>();//lista cronologica
+    private boolean mitomaneHasSecondChance=false;
+    //
+    private int guardiaPhaseDuration=7;
+    private int veggentePhaseDuration=7;
+    private int lupiPhaseDuration=20;
+    private int mitomanePhaseDuration=10;
+    private int linciaggioPhaseDuration=4*60;
 
     public Game(String name) {
         this.gameName=name;
@@ -53,13 +61,17 @@ public class Game extends Thread{
                 if (guardia!=null) {
                     messageTo(playersList, "Guardia del corpo, apri gli occhi!\nChi vuoi proteggere questa notte?");
                     try {
-                        String chosenPlayerName=queue.take();
+                        String chosenPlayerName=queue.poll(guardiaPhaseDuration,TimeUnit.SECONDS);
                         //controllo ridondante, ma da mantenere per sicurezza. in teoria il sito non deve permettere alla Guardia di scegliere se stessa
-                        if (!chosenPlayerName.equals(guardia.getPlayerName())) {
-                            Player<?> chosenPlayer=getFromName(chosenPlayerName);
-                            chosenPlayer.setIsProtected(true);
+                        if (chosenPlayerName!=null) {
+                            if (!chosenPlayerName.equals(guardia.getPlayerName())) {
+                                Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                                chosenPlayer.setIsProtected(true);
+                            } else {
+                                messageTo(guardia, "[Non è possibile proteggere se stessi.]");
+                            }
                         } else {
-                            messageTo(guardia, "[Non è possibile proteggere se stessi.]");
+                            messageTo(guardia, "[Tempo scaduto, non proteggerai nessuno questa notte.]");
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -80,20 +92,24 @@ public class Game extends Thread{
                     if (!veggente.getIsGhost()) areAllGhosts=false;
                 }
                 if (!areAllGhosts) {
-                    String chosenPlayerName=queue.take();
+                    String chosenPlayerName=queue.poll(veggentePhaseDuration,TimeUnit.SECONDS);
                     //still, controllo ridondante ma da mantenere per sicurezza sicurezza
-                    if (!isNameInList(veggenti, chosenPlayerName)) {
-                        String chosenPlayerRole=getFromName(chosenPlayerName).getRole().getClass().getSimpleName();
-                        for (Player<?> veggente:veggenti) {
-                            if (!veggente.getIsGhost()) {
-                                messageTo(veggente, "Il giocatore che è stato osservato è un "+chosenPlayerRole);
+                    if (chosenPlayerName!=null) {
+                        if (!isNameInList(veggenti, chosenPlayerName)) {
+                            String chosenPlayerRole=getFromName(chosenPlayerName).getRole().getClass().getSimpleName();
+                            for (Player<?> veggente:veggenti) {
+                                if (!veggente.getIsGhost()) {
+                                    messageTo(veggente, "Il giocatore che è stato osservato è un "+chosenPlayerRole);
+                                }
                             }
+                        } else {
+                            messageTo(veggenti, "[Non è possibile conoscere il ruolo di se stessi o di un altro veggente.]");
                         }
                     } else {
-                        messageTo(veggenti, "[Non è possibile conoscere il ruolo di se stessi o di un altro veggente.]");
+                        messageTo(veggenti, "[Tempo scaduto, non conoscerai il ruolo di nessuno questa notte.]");
                     }
                 } else {
-                    Thread.sleep(5000);//simulo l'esecuzione della fase
+                    Thread.sleep(veggentePhaseDuration*1000);//simulo l'esecuzione della fase
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -106,13 +122,17 @@ public class Game extends Thread{
             ArrayList<Player<?>> lupi=getOfRole("Lupo");
             messageTo(playersList, "Lupi mannari, aprite gli occhi!\n Chi volete sbranare stanotte?");
             try {
-                String chosenPlayerName=queue.take();
+                String chosenPlayerName=queue.poll(lupiPhaseDuration,TimeUnit.SECONDS);
                 //still, controllo ridondante ma da mantenere per sicurezza sicurezza
-                if (!isNameInList(lupi, chosenPlayerName)) {
-                    Player<?> chosenPlayer=getFromName(chosenPlayerName);
-                    killPlayer(chosenPlayer, true);
+                if (chosenPlayerName!=null) {
+                    if (!isNameInList(lupi, chosenPlayerName)) {
+                        Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                        killPlayer(chosenPlayer, true);
+                    } else {
+                        messageTo(lupi, "[Non è possibile sbranare se stessi o un altro lupo.]");
+                    }
                 } else {
-                    messageTo(lupi, "[Non è possibile sbranare se stessi o un altro lupo.]");
+                    messageTo(lupi, "[Tempo scaduto, nessuno verrà sbranato questa notte.]");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -141,23 +161,29 @@ public class Game extends Thread{
             //alla fine della seconda notte indica al moderatore un altro giocatore ancora vivo.
             //se questo non è un lupo mannaro o il veggente, il mitomane resta un umano normale fino al termine della partita.
             //altrimenti assume immediatamente il ruolo rispettivamente di lupo mannaro o di veggente, a tutti gli effetti.
-            if (numeroNotte==2) {
+            if (numeroNotte==2 || mitomaneHasSecondChance) {
+                mitomaneHasSecondChance=false;
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
                 Player<Mitomane> mitomane=(Player<Mitomane>)getOfRole("Mitomane").getFirst();
                 if (mitomane!=null) {
                     messageTo(playersList, "Mitomane, apri gli occhi!");
                     try {
-                        String chosenPlayerName=queue.take();
-                        Player<?> chosenPlayer=getFromName(chosenPlayerName);
-                        if (chosenPlayer.getRole().getClass().getSimpleName().equals("Lupo")) {
-                            changeRoleToLupo(mitomane);
-                            messageTo(mitomane, "La persona scelta era un Lupo! Otterrai questo nuovo ruolo e lo manterrai per il resto della partita.");
-                        } else if (chosenPlayer.getRole().getClass().getSimpleName().equals("Veggente")) {
-                            changeRoleToVeggente(mitomane);
-                            messageTo(mitomane, "La persona scelta era un Veggente! Otterrai questo nuovo ruolo e lo manterrai per il resto della partita.");
+                        String chosenPlayerName=queue.poll(mitomanePhaseDuration  ,TimeUnit.SECONDS);
+                        if (chosenPlayerName!=null) {
+                            Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                            if (chosenPlayer.getRole().getClass().getSimpleName().equals("Lupo")) {
+                                changeRoleToLupo(mitomane);
+                                messageTo(mitomane, "La persona scelta era un Lupo! Otterrai questo nuovo ruolo e lo manterrai per il resto della partita.");
+                            } else if (chosenPlayer.getRole().getClass().getSimpleName().equals("Veggente")) {
+                                changeRoleToVeggente(mitomane);
+                                messageTo(mitomane, "La persona scelta era un Veggente! Otterrai questo nuovo ruolo e lo manterrai per il resto della partita.");
+                            } else {
+                                changeRoleToVillico(mitomane);
+                                messageTo(mitomane, "La persona scelta non era un Lupo, e nemmeno un Veggente!\nManterrai il ruolo di Villico per il resto della partita.");
+                            }
                         } else {
-                            changeRoleToVillico(mitomane);
-                            messageTo(mitomane, "La persona scelta non era un Lupo, e nemmeno un Veggente!\nManterrai il ruolo di Villico per il resto della partita.");
+                            messageTo(mitomane, "[Tempo scaduto, non potrai assumere le sembiaze di nessuno. Potrai riprovare durante la prossima notte.]");
+                            mitomaneHasSecondChance=true;
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -168,22 +194,24 @@ public class Game extends Thread{
 
             //Massoni
             //sono due umani che conoscono reciprocamente il ruolo dell’altro. solo durante la prima notte il moderatore chiama anche i Massoni i quali aprono gli occhi e si riconoscono.
-            ArrayList<Player<?>> massoni=getOfRole("Massone");
-            if (!massoni.isEmpty()) {
-                messageTo(playersList, "Massoni, aprite gli occhi!");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            if (numeroNotte==1) {
+                ArrayList<Player<?>> massoni=getOfRole("Massone");
+                if (!massoni.isEmpty()) {
+                    messageTo(playersList, "Massoni, aprite gli occhi!");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    if (massoni.size()==1) messageTo(massoni, massoni.get(0).getPlayerName()+", siete il massone!");
+                    else messageTo(massoni, massoni.get(0).getPlayerName()+", "+massoni.get(1).getPlayerName()+", siete i massoni!");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    messageTo(playersList, "Massoni, chiudete gli occhi!");
                 }
-                if (massoni.size()==1) messageTo(massoni, massoni.get(0).getPlayerName()+", siete il massone!");
-                else messageTo(massoni, massoni.get(0).getPlayerName()+", "+massoni.get(1).getPlayerName()+", siete i massoni!");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                messageTo(playersList, "Massoni, chiudete gli occhi!");
             }
 
             //-----GIORNO-----
@@ -213,11 +241,16 @@ public class Game extends Thread{
             //poi i giocatori non indiziati e ancora vivi (esclusi quindi gli indiziati e i fantasmi) votano di nuovo il giocatore tra gli indiziati che verrà linciato.
             //chi ha preso più voti è linciato e diventa un fantasma (se parità, indice più basso)
             try {
-                Player<?> votedPlayer=getFromName(queue.take());
-                if (!votedPlayer.getIsProtected()) {
-                    killPlayer(votedPlayer, false);
-                    messageTo(playersList, "Il giocatore '"+votedPlayer.getPlayerName()+"' è stato linciato!");
-                    messageTo(votedPlayer, "A partire da ora giocherai come Fantasma: dovrai astenerti dai commenti e non potrai parlare per il resto della partita.");
+                String votedPlayerName=queue.poll(linciaggioPhaseDuration, TimeUnit.SECONDS);
+                if (votedPlayerName!=null) {
+                    Player<?> votedPlayer=getFromName(queue.take());
+                    if (!votedPlayer.getIsProtected()) {
+                        killPlayer(votedPlayer, false);
+                        messageTo(playersList, "Il giocatore '"+votedPlayer.getPlayerName()+"' è stato linciato!");
+                        messageTo(votedPlayer, "A partire da ora giocherai come Fantasma: dovrai astenerti dai commenti e non potrai parlare per il resto della partita.");
+                    }
+                } else {
+                    messageTo(playersList, "[Tempo scaduto, nessuno verrà linciato quest'oggi.]");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -301,11 +334,9 @@ public class Game extends Thread{
 
     public boolean addPlayer(String username) {
         if (namePlayersList.size()>=24) return false;//limite di 24 giocatori
-        if (!namePlayersList.contains(username)) {
-            namePlayersList.add(username);
-            return true;
-        }
-        return false;
+        if (namePlayersList.contains(username)) return false;
+        namePlayersList.add(username);
+        return true;
     }
 
     private void updater(ArrayList<Player<?>> list, String message, int paramCode) {

@@ -78,26 +78,28 @@ public class Controller {
         return list;
     }
 
-    @PostMapping("newGame")
-    public void createNewGame(@RequestHeader("GameName") String gameName) {
+    @PostMapping("newGame/{gameName}")
+    public void createNewGame(@PathParam("GameName") String gameName, @RequestHeader("Username") String username) {
         Game newOne=new Game(gameName);
         gamesList.add(newOne);
-        newOne.addPlayer(gameName);
+        newOne.addPlayer(username);
     }
 
     @PostMapping("enterGame/{gameName}")
     public boolean enterGame(@PathParam("gameName") String gameName, @RequestHeader("Username") String username) {
         Game foundGame=getFromName(gameName);
         if (foundGame==null || foundGame.hasStarted()) return false;
-        foundGame.addPlayer(username);
-        return true;
+        return foundGame.addPlayer(username);
     }
 
     @PostMapping("startGame/{gameName}")
-    public void startGame(@PathParam("gameName") String gameName, @RequestHeader("Username") String username) {
+    public boolean startGame(@PathParam("gameName") String gameName, @RequestHeader("Username") String username) {
         Game askedToStart=getFromName(username);
         if (askedToStart.getWhoStarted().equals(username) && askedToStart.getNamePlayersList().size()>=8) {
             askedToStart.start();
+            return true;
+        } else {
+            return false;
         }
     }
     //END OF PREP METHODS
