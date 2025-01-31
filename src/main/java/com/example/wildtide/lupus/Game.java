@@ -11,11 +11,12 @@ public class Game extends Thread{
     private ArrayList<String> namePlayersList=new ArrayList<String>();
     //
     private ArrayList<Player<?>> playersList=new ArrayList<Player<?>>();
-    private BlockingQueue<String> queue/* =new ArrayBlockingQueue<>(1) */;
+    private BlockingQueue<String> queue=new ArrayBlockingQueue<>(1);
     private boolean hasStarted=false;
     private boolean hasEnded=false;
     private boolean haveLupiWon=false;
     private int numeroNotte=0;
+    private int numeroGiorno=0;
     private ArrayList<Player<?>> ghosts=new ArrayList<Player<?>>();//lista cronologica
 
     public Game(String name) {
@@ -26,8 +27,12 @@ public class Game extends Thread{
     public void run(){
         hasStarted=true;
         assignRoles();
-        queue= new ArrayBlockingQueue<>(playersList.size());
-        //TO DO: rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
+        //rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
+        int openedWebSockets=0;
+        while (openedWebSockets<=playersList.size()) {
+            queue.take();
+            openedWebSockets++;
+        }
         while (!hasEnded) {
             numeroNotte++;
 
@@ -178,6 +183,7 @@ public class Game extends Thread{
             }
 
             //-----GIORNO-----
+            numeroGiorno++;
             messageTo(playersList, "E' giorno, tutti possono aprire gli occhi!");
 
             //viene mostrato a tutti chi è stato sbranato
@@ -374,7 +380,12 @@ public class Game extends Thread{
     private void killPlayer(Player<?> player, boolean hasBeenKilledDuringNight) {
         player.setIsGhost(true);//viene sbranato
         player.setHasBeenKilledDuringNight(hasBeenKilledDuringNight);
-        player.setNumeroNotteWhenKilled(numeroNotte);
+        if (hasBeenKilledDuringNight) {
+            player.setNumeroNotteWhenKilled(numeroNotte);
+        } else {
+            player.setNumeroGiornoWhenKilled(numeroGiorno);
+            //TO DO: aggiungere attributo numeroGiorno, setters e getters
+        }
         ghosts.add(player);//aggiunto alla lista cronologica dei giocatori morti
     }
 
