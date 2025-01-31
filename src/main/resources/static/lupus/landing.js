@@ -1,5 +1,5 @@
 currentGamesDiv=document.getElementById("currentGames");
-fetch("getGames", {
+fetch("openGames", {
     method: "GET"
 })
 .then(/*TO DO: ottenere la lista dei Games aperti*/)

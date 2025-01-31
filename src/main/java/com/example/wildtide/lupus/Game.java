@@ -27,11 +27,14 @@ public class Game extends Thread{
     public void run(){
         hasStarted=true;
         assignRoles();
-        //
         //rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
         int openedWebSockets=0;
         while (openedWebSockets<=playersList.size()) {
-            queue.take();
+            try {
+                queue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             openedWebSockets++;
         }
         while (!hasEnded) {

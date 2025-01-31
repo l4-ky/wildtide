@@ -7,6 +7,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,7 +40,11 @@ public class Controller {
                 playerFound.setSession(session);
 				//aggiungo alla queue un placeholder per indicare che la websocket è aperta e connessa. (vedi inizio Game-run())
 				//non serve indicare playerName o altre informazioni
-				gameFound.getQueue().put("");
+				try {
+                    gameFound.getQueue().put("");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 return true;
             } else {
                 return false;
@@ -62,6 +67,15 @@ public class Controller {
 			}
 		}
 		return true;
+    }
+
+    @GetMapping("openGames")
+    public ArrayList<String> getExistingGames() {
+        ArrayList<String> list=new ArrayList<String>();
+        for (Game game:gamesList) {
+            list.add(game.getGameName());
+        }
+        return list;
     }
 
     @PostMapping("newGame")
