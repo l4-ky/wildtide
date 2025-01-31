@@ -14,6 +14,7 @@ public class Player<Role> {
     private boolean isGhost;
     private boolean hasBeenKilledDuringNight=false;
     private int numeroNotteWhenKilled=0;
+    private int numeroGiornoWhenKilled=0;
 
     public Player(String name, Role role) {
         this.name=name;
@@ -71,6 +72,13 @@ public class Player<Role> {
     }
     public void setNumeroNotteWhenKilled(int numeroNotteWhenKilled) {
         this.numeroNotteWhenKilled = numeroNotteWhenKilled;
+    }
+
+    public int getNumeroGiornoWhenKilled() {
+        return numeroGiornoWhenKilled;
+    }
+    public void setNumeroGiornoWhenKilled(int numeroGiornoWhenKilled) {
+        this.numeroGiornoWhenKilled = numeroGiornoWhenKilled;
     }
 
     public boolean getHasBeenKilledDuringNight() {
