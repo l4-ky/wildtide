@@ -15,14 +15,17 @@
                 <h3>Game name</h3>
                 -
                 <h4>PlayerWhoCreated name</h4>
+                <input type="button" value="Enter"><!--gameName si prende navigando l'html tree per prendere il tag con nome-->
             </section>
         </div>
         <section>|</section><!--linea verticale di separazione-->
         <div>
             <!--apertura nuovo Game-->
             <input type="text" placeholder="game name">
-            <input type="button" value="Crea nuova partita">
+            <input type="button" value="Crea nuova partita" id="createGameBtn">
+            <input type="button" value="Avvia partita creata" id="startGameBtn" disabled>
         </div>
     </section>
+    <input type="text" placeholder="username">
 </body>
 </html>
