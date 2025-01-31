@@ -9,9 +9,9 @@ fetch("openGames", {
     list.forEach(game=>{
         section=document.createElement("section");
         h3=document.createElement("h3");
-        h3.innerHTML=game.name;//ottenere gameName
+        h3.innerHTML=game.name;//TO TEST: ottenere gameName
         h4=document.createElement("h4");
-        h4.innerHTML=game.whoCreatedIt;//same, ottenerlo
+        h4.innerHTML=game.whoCreatedIt;//TO TEST: ottenerlo
         enterBtn=document.createElement("input");
         enterBtn.type="button";
         enterBtn.value="Enter";
@@ -31,9 +31,8 @@ fetch("openGames", {
                     .then(response => response.json())
                     .then(couldEnter => {
                         if (couldEnter) {
-                            //TO DO
-                            //window.sessionStorage
-                            //window.location.href="game.html";
+                            window.sessionStorage.setItem("gameName",gameToEnter);
+                            window.location.href="game.html";
                         }
                     });
                 } else {
@@ -70,9 +69,8 @@ startGameBtn.onclick=()=>{
     .then(response => response.json())
     .then(couldStart => {
         if (couldStart) {
-            //TO DO
-            //window.sessionStorage
-            //window.location.href
+            window.sessionStorage.setItem("gameName",createdGameName);
+            window.location.href="game.html";
         } else {
             alert("Troppi pochi giocatori in coda per la partita, oppure il nome utente non corrisponde a quello del creatore della partita");
         }
