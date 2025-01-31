@@ -384,7 +384,6 @@ public class Game extends Thread{
             player.setNumeroNotteWhenKilled(numeroNotte);
         } else {
             player.setNumeroGiornoWhenKilled(numeroGiorno);
-            //TO DO: aggiungere attributo numeroGiorno, setters e getters
         }
         ghosts.add(player);//aggiunto alla lista cronologica dei giocatori morti
     }
