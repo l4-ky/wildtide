@@ -37,6 +37,9 @@ public class Controller {
             Player<?> playerFound=gameFound.getFromName(username);
             if (playerFound!=null) {
                 playerFound.setSession(session);
+				//aggiungo alla queue un placeholder per indicare che la websocket è aperta e connessa. (vedi inizio Game-run())
+				//non serve indicare playerName o altre informazioni
+				gameFound.getQueue().put("");
                 return true;
             } else {
                 return false;
@@ -132,10 +135,10 @@ public class Controller {
         }
     }
 
-    @SuppressWarnings("rawtypes")//just because
+	@SuppressWarnings("rawtypes")//just because
     @PostMapping("chat/{gameName}/{toWho}")
     public void redirectMessage(@PathParam("gameName") String gameName, @PathParam("toWho") String toWho, @RequestHeader("Username") String senderName, @RequestBody ArrayList messageReceived) {
         getFromName(gameName).redirect(toWho, senderName, messageReceived);
-    }
+	}
     //END OF IN-GAME METHODS
 }
