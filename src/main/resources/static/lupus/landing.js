@@ -1,7 +1,7 @@
+const URLPrefix="/lupus/";
 usernameInput=document.getElementById("usernameInput");
-
 currentGamesDiv=document.getElementById("currentGames");
-fetch("openGames", {
+fetch(URLPrefix+"openGames", {
     method: "GET"
 })
 .then(response => response.json())
@@ -17,21 +17,23 @@ fetch("openGames", {
         enterBtn.value="Enter";
         enterBtn.onclick=(event)=>{
             let gameToEnter=event.currentTarget.previousElementSibling.previousElementSibling.value;
-            fetch("testUsername", {
+            let tempUsername=usernameInput.value;
+            fetch(URLPrefix+"testUsername", {
                 method: "POST",
-                headers: {"Username":usernameInput.value}
+                headers: {"Username":tempUsername}
             })
             .then(response => response.json())
             .then(isNameOK => {
                 if (isNameOK) {
-                    fetch("enterGame/"+gameToEnter, {
+                    fetch(URLPrefix+"enterGame/"+gameToEnter, {
                         method: "POST",
-                        headers: {"Username":usernameInput.value}
+                        headers: {"Username":tempUsername}
                     })
                     .then(response => response.json())
                     .then(couldEnter => {
                         if (couldEnter) {
                             window.sessionStorage.setItem("gameName",gameToEnter);
+                            window.sessionStorage.setItem("username",tempUsername);
                             window.location.href="game.html";
                         }
                     });
@@ -52,7 +54,7 @@ createGameBtn=document.getElementById("createGameBtn");
 createGameBtn.onclick=()=>{
     createdGameName=createGameBtn.previousElementSibling.value;
     if (testUsername(usernameInput.value) && testUsername(createGameBtn)) {
-        fetch("newGame/"+createdGameName, {
+        fetch(URLPrefix+"newGame/"+createdGameName, {
             method: "POST",
             headers: {"Username":usernameInput.value}
         });
@@ -62,7 +64,7 @@ createGameBtn.onclick=()=>{
 };
 startGameBtn=document.getElementById("startGameBtn");
 startGameBtn.onclick=()=>{
-    fetch("startGame/"+createdGameName, {
+    fetch(URLPrefix+"startGame/"+createdGameName, {
         method: "POST",
         headers: {"Username":usernameInput.value}
     })
@@ -70,6 +72,7 @@ startGameBtn.onclick=()=>{
     .then(couldStart => {
         if (couldStart) {
             window.sessionStorage.setItem("gameName",createdGameName);
+            window.sessionStorage.setItem("username",tempUsername);
             window.location.href="game.html";
         } else {
             alert("Troppi pochi giocatori in coda per la partita, oppure il nome utente non corrisponde a quello del creatore della partita");
@@ -78,7 +81,7 @@ startGameBtn.onclick=()=>{
 };
 
 function testUsername(nameToBeTested) {
-    fetch("testUsername", {
+    fetch(URLPrefix+"testUsername", {
         method: "POST",
         headers: {"Username":nameToBeTested}
     })

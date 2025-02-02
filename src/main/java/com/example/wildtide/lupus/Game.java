@@ -31,6 +31,7 @@ public class Game extends Thread{
         this.gameName=name;
     }
 
+    //TO DO: se il Role incapsulato nel Player non viene usato per metodi aggiuntivi, può essere trasformato in una semplice stringa contenente il ruolo. tutti i riferimenti al Player Role dovranno poi esserea adeguati. (prossibile alleggerimento nelle prestazioni, in quanto elabora stringe e non oggetti, anche con meno chiamate a metodi)
     @Override
     public void run(){
         hasStarted=true;
@@ -45,6 +46,10 @@ public class Game extends Thread{
             }
             openedWebSockets++;
         }
+        //invio info iniziali ai siti
+        messageTo(playersList, playersList, 300);
+        
+        //
         while (!hasEnded) {
             numeroNotte++;
 
@@ -343,17 +348,22 @@ public class Game extends Thread{
         //TO DO
     }
 
-    private void messageTo(Player<?> x, String m) {
+    /* 
+     * 200: normale messaggio testuale
+     * 300: inizializzazione sito
+     * 
+     */
+    private void messageTo(Player<?> x, Object m) {
         messageTo(x, m, 200);
     }
-    private void messageTo(Player<?> x, String m, int paramCode) {
+    private void messageTo(Player<?> x, Object m, int paramCode) {
         messageTo(new ArrayList<Player<?>>(Arrays.asList(x)), m, paramCode);
     }
 
-    private void messageTo(ArrayList<Player<?>> list, String message) {
+    private void messageTo(ArrayList<Player<?>> list, Object message) {
         messageTo(list, message, 200);
     }
-    private void messageTo(ArrayList<Player<?>> list, String message, int paramCode) {
+    private void messageTo(ArrayList<Player<?>> list, Object message, int paramCode) {
         @SuppressWarnings({ "unchecked", "rawtypes" })//just because. sono consapevole della non tipizzazione della lista
         ArrayList listToBeSent=new ArrayList(Arrays.asList(paramCode, "Moderatore", message));
         for (Player<?> player:list) {

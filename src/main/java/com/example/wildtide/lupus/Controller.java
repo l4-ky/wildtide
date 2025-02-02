@@ -105,8 +105,17 @@ public class Controller {
     //END OF PREP METHODS
 
     //IN-GAME METHODS
+    @PutMapping("choice/{gameName}")
+    public void guardiaChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+        try {
+            getFromName(gameName).getQueue().put(chosenPlayer);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     //(i metodi 'choice' che non hanno alterazioni particolari si potrebbero unificare, hanno lo stesso corpo e svolgono la stessa funzione)
-    @PutMapping("choice/{gameName}/guardia")
+    /* @PutMapping("choice/{gameName}/guardia")
     public void guardiaChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
         try {
             getFromName(gameName).getQueue().put(chosenPlayer);
@@ -149,7 +158,7 @@ public class Controller {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
+    } */
 
 	@SuppressWarnings("rawtypes")//just because
     @PostMapping("chat/{gameName}/{toWho}")
