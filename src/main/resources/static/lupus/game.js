@@ -1,11 +1,18 @@
 const URLPrefix="/lupus/";
 const username=window.sessionStorage.getItem("username");
 const gameName=window.sessionStorage.getItem("gameName");
-const socket=new WebSocket(URLPrefix+gameName+"/"+username);
-socket.addEventListener("open", (event) => {
-    console.log("websocket opened.")
-});
-socket.addEventListener("message", (event) => {
-    console.log(event.data);
-    //logica x messagi in input
+let socket;
+fetch(URLPrefix+"canOpenWebsocket/"+gameName, {
+    method: "GET"
+})
+.then(() => {
+    /* teoricamente non ho bisogno di controllare alcun parametro perchè il metodo del Controller risponde solo quando ottiene il permesso di far aprire le Websocket */
+    socket=new WebSocket(URLPrefix+gameName+"/"+username);
+    socket.addEventListener("open", (event) => {
+        console.log("websocket opened.")
+    });
+    socket.addEventListener("message", (event) => {
+        console.log(event.data);
+        //logica x messagi in input
+    });
 });

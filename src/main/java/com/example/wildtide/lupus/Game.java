@@ -3,6 +3,7 @@ package com.example.wildtide.lupus;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -11,8 +12,9 @@ public class Game extends Thread{
     private String gameName;
     private ArrayList<String> namePlayersList=new ArrayList<String>();
     //
-    private ArrayList<Player<?>> playersList=new ArrayList<Player<?>>();
+    private HashMap<String, Player<?>> playersList=new HashMap<String, Player<?>>();
     private BlockingQueue<String> queue=new ArrayBlockingQueue<>(1);
+    private boolean canOpenWebsockets=false;
     private boolean hasStarted=false;
     private boolean hasEnded=false;
     private boolean haveLupiWon=false;
@@ -31,13 +33,14 @@ public class Game extends Thread{
         this.gameName=name;
     }
 
-    //TO DO: se il Role incapsulato nel Player non viene usato per metodi aggiuntivi, può essere trasformato in una semplice stringa contenente il ruolo. tutti i riferimenti al Player Role dovranno poi esserea adeguati. (prossibile alleggerimento nelle prestazioni, in quanto elabora stringe e non oggetti, anche con meno chiamate a metodi)
+    int openedWebSockets=0;
     @Override
     public void run(){
         hasStarted=true;
         assignRoles();
+        canOpenWebsockets=true;
+        //TO DO: se il Role incapsulato nel Player non viene usato per metodi aggiuntivi, può essere trasformato in una semplice stringa contenente il ruolo. tutti i riferimenti al Player Role dovranno poi esserea adeguati. (prossibile alleggerimento nelle prestazioni, in quanto elabora stringe e non oggetti, anche con meno chiamate a metodi)
         //rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
-        int openedWebSockets=0;
         while (openedWebSockets<=playersList.size()) {
             try {
                 queue.take();
@@ -46,8 +49,11 @@ public class Game extends Thread{
             }
             openedWebSockets++;
         }
+        
         //invio info iniziali ai siti
-        messageTo(playersList, playersList, 300);
+        for (Player<?> player:playersList.values()) {
+            player.sendMessage(new ArrayList<>(Arrays.asList(300, "Moderatore", playersList.values())));
+        }
         
         //
         while (!hasEnded) {
@@ -70,7 +76,7 @@ public class Game extends Thread{
                         //controllo ridondante, ma da mantenere per sicurezza. in teoria il sito non deve permettere alla Guardia di scegliere se stessa
                         if (chosenPlayerName!=null) {
                             if (!chosenPlayerName.equals(guardia.getPlayerName())) {
-                                Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                                Player<?> chosenPlayer=playersList.get(chosenPlayerName);
                                 chosenPlayer.setIsProtected(true);
                             } else {
                                 messageTo(guardia, "[Non è possibile proteggere se stessi.]");
@@ -101,7 +107,7 @@ public class Game extends Thread{
                     //still, controllo ridondante ma da mantenere per sicurezza sicurezza
                     if (chosenPlayerName!=null) {
                         if (!isNameInList(veggenti, chosenPlayerName)) {
-                            String chosenPlayerRole=getFromName(chosenPlayerName).getRole().getClass().getSimpleName();
+                            String chosenPlayerRole=playersList.get(chosenPlayerName).getRole().getClass().getSimpleName();
                             for (Player<?> veggente:veggenti) {
                                 if (!veggente.getIsGhost()) {
                                     messageTo(veggente, "Il giocatore che è stato osservato è un "+chosenPlayerRole);
@@ -131,7 +137,7 @@ public class Game extends Thread{
                 //still, controllo ridondante ma da mantenere per sicurezza sicurezza
                 if (chosenPlayerName!=null) {
                     if (!isNameInList(lupi, chosenPlayerName)) {
-                        Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                        Player<?> chosenPlayer=playersList.get(chosenPlayerName);
                         killPlayer(chosenPlayer, true);
                     } else {
                         messageTo(lupi, "[Non è possibile sbranare se stessi o un altro lupo.]");
@@ -175,7 +181,7 @@ public class Game extends Thread{
                     try {
                         String chosenPlayerName=queue.poll(mitomanePhaseDuration  ,TimeUnit.SECONDS);
                         if (chosenPlayerName!=null) {
-                            Player<?> chosenPlayer=getFromName(chosenPlayerName);
+                            Player<?> chosenPlayer=playersList.get(chosenPlayerName);
                             if (chosenPlayer.getRole().getClass().getSimpleName().equals("Lupo")) {
                                 changeRoleToLupo(mitomane);
                                 messageTo(mitomane, "La persona scelta era un Lupo! Otterrai questo nuovo ruolo e lo manterrai per il resto della partita.");
@@ -248,7 +254,7 @@ public class Game extends Thread{
             try {
                 String votedPlayerName=queue.poll(linciaggioPhaseDuration, TimeUnit.SECONDS);
                 if (votedPlayerName!=null) {
-                    Player<?> votedPlayer=getFromName(queue.take());
+                    Player<?> votedPlayer=playersList.get(queue.take());
                     if (!votedPlayer.getIsProtected()) {
                         killPlayer(votedPlayer, false);
                         messageTo(playersList, "Il giocatore '"+votedPlayer.getPlayerName()+"' è stato linciato!");
@@ -292,7 +298,7 @@ public class Game extends Thread{
         //minimo 8 giocatori per iniziare la partita, quindi non serve un if per controllare se eseguire il primo ciclo
         for (Player<?> player:list1) {
             list1.getFirst().setPlayerName(player.getPlayerName());
-            playersList.add(list1.getFirst());
+            playersList.put(player.getPlayerName(), list1.getFirst());
             list1.remove(0);
             namePlayersList.remove(0);
         }
@@ -302,7 +308,7 @@ public class Game extends Thread{
         Collections.shuffle(list2);
         for (Player<?> player:list2) {
             list2.getFirst().setPlayerName(player.getPlayerName());
-            playersList.add(list2.getFirst());
+            playersList.put(player.getPlayerName(), list2.getFirst());
             list2.remove(0);
             namePlayersList.remove(0);
             if (namePlayersList.isEmpty()) return;
@@ -312,20 +318,11 @@ public class Game extends Thread{
         Collections.shuffle(list3);
         for (Player<?> player:list3) {
             list3.getFirst().setPlayerName(player.getPlayerName());
-            playersList.add(list3.getFirst());
+            playersList.put(player.getPlayerName(), list3.getFirst());
             list3.remove(0);
             namePlayersList.remove(0);
             if (namePlayersList.isEmpty()) return;
         }
-    }
-
-    public Player<?> getFromName(String name) {
-        for (Player<?> player:playersList) {
-            if (player.getPlayerName().equals(name)) {
-                return player;
-            }
-        }
-        return null;
     }
 
     private boolean isNameInList(ArrayList<Player<?>> list, String name) {
@@ -344,53 +341,61 @@ public class Game extends Thread{
         return true;
     }
 
-    private void updater(ArrayList<Player<?>> list, String message, int paramCode) {
+    /* private void updater(ArrayList<Player<?>> list, String message, int paramCode) {
         //TO DO
-    }
+    } */
 
+    //
     /* 
      * 200: normale messaggio testuale
      * 300: inizializzazione sito
      * 
      */
-    private void messageTo(Player<?> x, Object m) {
-        messageTo(x, m, 200);
+    private void messageTo(Player<?> x, String m) {
+        messageTo(new ArrayList<Player<?>>(Arrays.asList(x)), m, 200);
     }
-    private void messageTo(Player<?> x, Object m, int paramCode) {
-        messageTo(new ArrayList<Player<?>>(Arrays.asList(x)), m, paramCode);
+    private void messageTo(HashMap<String, Player<?>> temp, String message) {
+        messageTo(new ArrayList<Player<?>>(temp.values()), message, 200);
+    }
+    @SuppressWarnings("unused")
+    private void messageTo(HashMap<String, Player<?>> temp, String message, int paramCode) {
+        messageTo(new ArrayList<Player<?>>(temp.values()), message, paramCode);
     }
 
-    private void messageTo(ArrayList<Player<?>> list, Object message) {
+    private void messageTo(ArrayList<Player<?>> list, String message) {
         messageTo(list, message, 200);
     }
-    private void messageTo(ArrayList<Player<?>> list, Object message, int paramCode) {
+    private void messageTo(ArrayList<Player<?>> list, String message, int paramCode) {
         @SuppressWarnings({ "unchecked", "rawtypes" })//just because. sono consapevole della non tipizzazione della lista
         ArrayList listToBeSent=new ArrayList(Arrays.asList(paramCode, "Moderatore", message));
         for (Player<?> player:list) {
             player.sendMessage(listToBeSent);
         }
     }
-
-    @SuppressWarnings("rawtypes")//just because
-    public void redirect(String toWho, String senderName, ArrayList toBeSent) {
-        new Thread(() -> redirectInThread(toWho, senderName, toBeSent)).start();
-    }
+    //
+    
     @SuppressWarnings({ "rawtypes", "unchecked" })//just because
-    private void redirectInThread(String toWho, String senderName, ArrayList toBeSent) {
-        toBeSent.add(1,senderName);
-        ArrayList<Player<?>> playersFound=getOfRole(toWho);
-        for (Player<?> player:playersFound) {
-            player.sendMessage(toBeSent);
-        }
+    public void redirect(String toRole, String senderName, String message) {
+        new Thread(() -> {
+            ArrayList toBeSent=new ArrayList(Arrays.asList(200, senderName, message));
+            ArrayList<Player<?>> playersFound;
+            if (toRole.equals("all")) {
+                playersFound=(ArrayList<Player<?>>)playersList.values();
+            } else {
+                playersFound=getOfRole(toRole);
+            }
+            for (Player<?> player:playersFound) {
+                player.sendMessage(toBeSent);
+            }
+        }).start();
     }
 
+    @SuppressWarnings("unused")
     public ArrayList<Player<?>> getOfRole(String type) {
         ArrayList<Player<?>> list=new ArrayList<>();
-        for (Player<?> player:playersList) {
-            if (player.getRole().getClass().getSimpleName().equals(type)) {
-                list.add(player);
-            }
-        }
+        playersList.forEach((key, value) -> {
+            list.add(value);
+        });
         return list;
     }
 
@@ -403,23 +408,20 @@ public class Game extends Thread{
 
     private void changeRoleToLupo(Player<Mitomane> mitomane) {
         Player<Lupo> lupo=new Player<Lupo>(mitomane, new Lupo());
-        int pos=playersList.indexOf(mitomane);
-        playersList.remove(pos);
-        playersList.add(pos, lupo);
+        playersList.remove(mitomane.getPlayerName());
+        playersList.put(lupo.getPlayerName(), lupo);
     }
 
     private void changeRoleToVeggente(Player<Mitomane> mitomane) {
         Player<Veggente> veggente=new Player<Veggente>(mitomane, new Veggente());
-        int pos=playersList.indexOf(mitomane);
-        playersList.remove(pos);
-        playersList.add(pos, veggente);
+        playersList.remove(mitomane.getPlayerName()); 
+        playersList.put(veggente.getPlayerName(), veggente);
     }
 
     private void changeRoleToVillico(Player<Mitomane> mitomane) {
         Player<Villico> villico=new Player<Villico>(mitomane, new Villico());
-        int pos=playersList.indexOf(mitomane);
-        playersList.remove(pos);
-        playersList.add(pos, villico);
+        playersList.remove(mitomane.getPlayerName());
+        playersList.put(villico.getPlayerName(), villico);
     }
 
     private void killPlayer(Player<?> player, boolean hasBeenKilledDuringNight) {
@@ -448,9 +450,16 @@ public class Game extends Thread{
     public ArrayList<String> getNamePlayersList() {
         return namePlayersList;
     }
+    public HashMap<String, Player<?>> getPlayersList() {
+        return playersList;
+    }
 
     public BlockingQueue<String> getQueue() {
         return queue;
+    }
+    
+    public boolean getCanOpenWebsockets() {
+        return canOpenWebsockets;
     }
 
     public boolean getHaveLupiWon() {
