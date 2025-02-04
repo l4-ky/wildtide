@@ -159,7 +159,6 @@ public class Controller {
         }
     } */
 
-	@SuppressWarnings("rawtypes")//just because
     @PostMapping("chat/{gameName}/{toRole}")
     public void redirectMessage(@PathParam("gameName") String gameName, @PathParam("toRole") String toRole, @RequestHeader("Username") String senderName, @RequestBody String messageReceived) {
         gamesHashMap.get(gameName).redirect(toRole, senderName, messageReceived);

@@ -6,6 +6,7 @@ fetch(URLPrefix+"openGames", {
 })
 .then(response => response.json())
 .then(list => {
+    console.log(list);//TO TEST
     list.forEach(game=>{
         section=document.createElement("section");
         h3=document.createElement("h3");

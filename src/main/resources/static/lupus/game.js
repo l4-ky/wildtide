@@ -19,8 +19,40 @@ fetch(URLPrefix+"canOpenWebsocket/"+gameName, {
         if (mess.code==200) {
             addMessageToChat(mess.sender, mess.message);
         } else if (mess.code=300) {
+            let container=document.getElementById("playersContainer");
             mess.message.forEach((player) => {
-                //TO DO: aggiungere le cards per i player
+                if (player.name=username) {
+                    let selfUsername=document.getElementById("selfUsername");
+                    /* if (player.role=="Villico") //TO DO: set immagini
+                    else if (player.role=="Lupo")
+                    else if (player.role="Veggente")
+                    else if (player.role="Mitomane")
+                    else if (player.role="Medium")
+                    else if (player.role="Guardia")
+                    else if (player.role="Massone") */
+                } else {
+                    //TO DO: aggiungere le cards per i player
+                    card=document.createElement("div");
+                    card.classList.add("playerCard");
+                    section=document.createElement("section");
+                    h5=document.createElement("h5");
+                    h5.innerHTML=player.name;//TO DO: get name
+                    h5.id=player.name;//same
+                    section.appendChild(h5);
+                    img=document.createElement("img");
+                    /* 
+                    if (player.role=="Villico") //TO DO: set immagini
+                    else if (player.role=="Lupo")
+                    else if (player.role="Veggente")
+                    else if (player.role="Mitomane")
+                    else if (player.role="Medium")
+                    else if (player.role="Guardia")
+                    else if (player.role="Massone")
+                    */
+                    card.appendChild(section);
+                    card.appendChild(img);
+                    container.appendChild(card);
+                }
             });
         }
     });
