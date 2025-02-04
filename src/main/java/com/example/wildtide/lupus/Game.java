@@ -33,6 +33,8 @@ public class Game extends Thread{
         this.gameName=name;
     }
 
+    //TO DO: polling o similare per controllare che il Game sia 'alive', cioè che non sia una partita fantastma avviata e mai "giocata"
+
     int openedWebSockets=0;
     @Override
     public void run(){
@@ -56,6 +58,7 @@ public class Game extends Thread{
         }
         
         //
+        messageTo(playersList, "La partita è iniziata!", 400);
         while (!hasEnded) {
             numeroNotte++;
 

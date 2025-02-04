@@ -50,6 +50,16 @@ public class Controller {
         Game newOne=new Game(gameName);
         gamesHashMap.put(gameName, newOne);
         newOne.addPlayer(username);
+        new Thread(() -> {
+            try {
+                Thread.sleep(70000);//un minuto e un secondo.
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (!newOne.isAlive()) {
+                gamesHashMap.remove(gameName);
+            }
+        }).start();
     }
     
     @PostMapping("enterGame/{gameName}")

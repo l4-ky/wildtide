@@ -54,6 +54,9 @@ fetch(URLPrefix+"canOpenWebsocket/"+gameName, {
                     container.appendChild(card);
                 }
             });
+        } else if (mess.code=400) {
+            //TO DO: fixare notifica inizio partita
+            alert(mess.message);
         }
     });
 });
