@@ -1,7 +1,9 @@
 package com.example.wildtide.lupus;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -19,36 +21,50 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/lupus/")
 @ServerEndpoint("/lupus/{gameName}/{username}")
-public class Controller {
+public class LupusController {
     private HashMap<String, Game> gamesHashMap=new HashMap<String, Game>();
 
     //PREP METHODS
     @PostMapping("testUsername")
-    public boolean testUsername(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
+    public boolean testUsername(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username, @RequestHeader("Exists") boolean exists) {
         if(username==null || username.isEmpty() || username.matches("^[^a-zA-Z0-9_]*$") || username.contains(" ")) {
             return false;
-		} else {
+        } else {
             Game foundGame=gamesHashMap.get(gameName);
             if (foundGame!=null) {
                 for (String name:foundGame.getNamePlayersList()) {
-                    if (name.equals(username)) return false;
+                    if (name.equals(username)) {
+                        return false;
+                    }
                 }
             } else {
-                return false;
+                //il Game creato non esiste
+                if (exists==false) {
+                    //ma il Game in questione è in fase di creazione, quindi risponde 'true' per accettare il nome richiesto
+                    return true;
+                } else {
+                    //il Game cercato semplicemente non esiste, probabilmente per nome inserito sbagliato o proprio non esistente
+                    return false;
+                }
             }
-		}
-		return true;
+        }
+        System.out.println(true);
+        return true;
     }
     
     @GetMapping("openGames")
-    public ArrayList<String> getExistingGames() {
-        return new ArrayList<>(gamesHashMap.keySet());
+    public Collection<Game> getExistingGames() {
+        Collection<Game> temp=gamesHashMap.values();
+        return temp;
     }
 
-    @PostMapping("newGame/{gameName}")
-    public void createNewGame(@PathParam("GameName") String gameName, @RequestHeader("Username") String username) {
+    //RIPRENDERE DA QUA
+    @PostMapping("newGame")
+    public void createNewGame(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
+        System.out.println(gameName+"\n"+username);//DEBUG
         Game newOne=new Game(gameName);
         gamesHashMap.put(gameName, newOne);
+        System.out.println(gamesHashMap.get(gameName));//DEBUG
         newOne.addPlayer(username);
         new Thread(() -> {
             try {

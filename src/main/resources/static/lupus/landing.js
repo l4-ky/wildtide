@@ -7,11 +7,12 @@ setInterval(() => {
         method: "GET"
     })
     .then(response => response.json())
-    .then(list => {
-        console.log(list);//TO TEST
+     .then(list => {
+        if (list.length==0) console.log("no existing games...");//DEBUG
         list.forEach(game=>{
             //se ho creto io una partita non deve mostrarla tra quelle disponibili
-            if (game.name!=gameNameThatIHaveCreated) {
+            console.log(game);
+            /* if (game.name!=gameNameThatIHaveCreated) {
                 section=document.createElement("section");
                 h3=document.createElement("h3");
                 h3.innerHTML=game.name;//TO TEST: ottenere gameName
@@ -23,58 +24,57 @@ setInterval(() => {
                 enterBtn.onclick=(event)=>{
                     let gameToEnter=event.currentTarget.previousElementSibling.previousElementSibling.value;
                     let tempUsername=usernameInput.value;
-                    fetch(URLPrefix+"testUsername", {
-                        method: "POST",
-                        headers: {"Username":tempUsername}
-                    })
-                    .then(response => response.json())
-                    .then(isNameOK => {
-                        if (isNameOK) {
-                            fetch(URLPrefix+"enterGame/"+gameToEnter, {
-                                method: "POST",
-                                headers: {"Username":tempUsername}
-                            })
-                            .then(response => response.json())
-                            .then(couldEnter => {
-                                if (couldEnter) {
-                                    window.sessionStorage.setItem("gameName",gameToEnter);
-                                    window.sessionStorage.setItem("username",tempUsername);
-                                    window.location.href="game.html";
-                                }
-                            });
-                        } else {
-                            alert("Il nome giocatore scelto non è accettabile.Riprova.\n(non può essere vuoto o contentere spazi, ammette solo lettere, cifre o _)");
-                        }
-                    });
+                    if (testUsername(gameToEnter, tempUsername)) {
+                        fetch(URLPrefix+"enterGame/"+gameToEnter, {
+                            method: "POST",
+                            headers: {"Username":tempUsername}
+                        })
+                        .then(response => response.json())
+                        .then(couldEnter => {
+                            if (couldEnter) {
+                                window.sessionStorage.setItem("gameName",gameToEnter);
+                                window.sessionStorage.setItem("username",tempUsername);
+                                window.location.href="game.html";
+                            }
+                        });
+                    } else {
+                        alert("Il nome giocatore scelto non è accettabile.Riprova.\n(non può essere vuoto o contentere spazi, ammette solo lettere, cifre o _)");
+                    }
                 };
                 section.appendhild(h3);
                 section.appendChild(h4);
                 section.appendChild(enterBtn);
                 currentGamesDiv.appendChild(section);
-            }
+            } */
         });
-    });
+    }) ;
 }, 3000);
 
 let createdGameName;
 createGameBtn=document.getElementById("createGameBtn");
-createGameBtn.onclick=()=>{
+createGameBtn.onclick= async ()=>{
     createdGameName=createGameBtn.previousElementSibling.value;
-    if (testUsername(usernameInput.value) && testUsername(createGameBtn)) {
-        fetch(URLPrefix+"newGame/"+createdGameName, {
+    let x=await testUsername(false, usernameInput.value);
+    console.log(x);
+    if (x) {
+        fetch(URLPrefix+"newGame/", {
             method: "POST",
-            headers: {"Username":usernameInput.value}
+            headers: {
+                "GameName":createdGameName,
+                "Username":usernameInput.value
+            }
         });
-        gameNameThatIHaveCreated=usernameInput.value;
         let timeoutId=setTimeout(() => {
-            alert("La partita da te creata ("+gameNameThatIHaveCreated+") è stata annullata per inattività.");
+            alert("La partita da te creata ("+createdGameName+") è stata annullata per inattività.");
             window.location.reload();
         },60000);
         window.addEventListener('beforeunload', function(event) {
             this.clearTimeout(timeoutId);
         });
     } else {
-        alert("Il nome giocatore o partita scelto non è accettabile.Riprova.\n(non può essere vuoto o contentere spazi, ammette solo lettere, cifre o _)");
+        console.log("nope");
+        //TO BE SHOWN
+        //alert("Il nome giocatore o partita scelto non è accettabile.Riprova.\n(non può essere vuoto o contentere spazi, ammette solo lettere, cifre o _)");
     }
 };
 startGameBtn=document.getElementById("startGameBtn");
@@ -95,14 +95,18 @@ startGameBtn.onclick=()=>{
     });
 };
 
-function testUsername(nameToBeTested) {
-    fetch(URLPrefix+"testUsername", {
+async function testUsername(gameName, nameToBeTested) {
+    return fetch(URLPrefix+"testUsername", {
         method: "POST",
-        headers: {"Username":nameToBeTested}
+        headers: {
+            "GameName":gameName,
+            "Username":nameToBeTested,
+            "Exists":gameName
+        }
     })
     .then(response => response.json())
     .then(isNameOK => {
-        if (isNameOK) return true;
-        else return false;
+        console.log(isNameOK);
+        return isNameOK;
     });
 }

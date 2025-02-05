@@ -17,7 +17,7 @@ import com.google.gson.Gson;
 
 @RestController
 @RequestMapping("/lockey/")
-public class Controller {
+public class LockeyController {
     @PostMapping("signIn")
     public ResponseEntity<BoolResponse> signin(@RequestHeader("Username") String username, @RequestHeader("Pin") String pin) {
         try {
