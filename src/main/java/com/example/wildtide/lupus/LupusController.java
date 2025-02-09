@@ -1,9 +1,7 @@
 package com.example.wildtide.lupus;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
 
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -87,9 +85,22 @@ public class LupusController {
     
     @PostMapping("startGame/{gameName}")
     public boolean startGame(@PathParam("gameName") String gameName, @RequestHeader("Username") String username) {
-        Game askedToStart=gamesHashMap.get(username);
-        if (askedToStart.getWhoStarted().equals(username) && askedToStart.getNamePlayersList().size()>=8) {
+        Game askedToStart=gamesHashMap.get(gameName);
+        if (askedToStart.getWhoCreated().equals(username) && askedToStart.getNamePlayersList().size()>=8) {
             askedToStart.start();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    //TO DO: deve essere DeleteMapping
+    @PutMapping("discardGame")
+    public boolean discardGame(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
+        Game toDiscard=gamesHashMap.get(gameName);
+        if (toDiscard.getWhoCreated().equals(username) && !toDiscard.hasStarted()) {
+            toDiscard.disposeOfGame();
+            gamesHashMap.remove(gameName);
             return true;
         } else {
             return false;

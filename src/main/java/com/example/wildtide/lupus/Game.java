@@ -438,6 +438,10 @@ public class Game extends Thread{
         ghosts.add(player);//aggiunto alla lista cronologica dei giocatori morti
     }
 
+    public void disposeOfGame() {
+        //TO DO: notificare tutti i Player già partecipanti che questo Game è stato scartato. dovranno tornare alla pagina precedente
+    }
+
     public String getGameName() {
         return gameName;
     }
@@ -446,7 +450,7 @@ public class Game extends Thread{
         return hasStarted;
     }
 
-    public String getWhoStarted() {
+    public String getWhoCreated() {
         return namePlayersList.getFirst();
     }
 
