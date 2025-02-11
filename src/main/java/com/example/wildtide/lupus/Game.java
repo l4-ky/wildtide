@@ -360,7 +360,6 @@ public class Game extends Thread{
     private void messageTo(HashMap<String, Player<?>> temp, String message) {
         messageTo(new ArrayList<Player<?>>(temp.values()), message, 200);
     }
-    @SuppressWarnings("unused")
     private void messageTo(HashMap<String, Player<?>> temp, String message, int paramCode) {
         messageTo(new ArrayList<Player<?>>(temp.values()), message, paramCode);
     }
