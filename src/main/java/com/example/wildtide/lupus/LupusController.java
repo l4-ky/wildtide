@@ -25,22 +25,20 @@ public class LupusController {
 
     //PREP METHODS
     @PostMapping("testUsername")
-    public boolean testUsername(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username, @RequestHeader(name="Exists",defaultValue="true") boolean exists) {
-        //System.out.println(gameName+" - "+username+" - "+exists);//DEBUG
-        if(username==null || username.isEmpty() || username.matches("^[^a-zA-Z0-9_]*$") || username.contains(" ") || (exists==true && (gameName==null || gameName.isEmpty() || gameName.matches("^[^a-zA-Z0-9_]*$") || gameName.contains(" ")))) return false;
-        //reitero su tutti i Player in ogni Game, così sono sicuro di avere il giusto riscontro. (fuck resource management)
-        //controllo se esiste un Game con il nome dato
-        if (gamesHashMap.containsKey(gameName)) return false;
-        //controllo se esiste un Player con il nome dato, in assoluto
-        for (Game game:gamesHashMap.values()) {
-            for (String name:game.getNamePlayersList()) {
-                if (name.equals(username)) {
-                    return false;
-                }
+    public boolean testUsername(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
+        Game found=gamesHashMap.get(gameName);
+        if (found==null) {
+            return !(
+                (gameName==null || gameName.isEmpty() || gameName.matches(".*[^a-zA-Z0-9_].*") || gameName.contains(" "))
+                &&
+                (username==null || username.isEmpty() || username.matches(".*[^a-zA-Z0-9_].*") || username.contains(" "))
+                );
+        } else {
+            for (String playerName:found.getNamePlayersList()) {
+                if (playerName.equals(username)) return false;
             }
+            return !(username==null || username.isEmpty() || username.matches(".*[^a-zA-Z0-9_].*") || username.contains(" "));
         }
-        //
-        return true;
     }
     
     @GetMapping("openGames")

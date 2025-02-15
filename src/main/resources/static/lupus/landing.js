@@ -15,11 +15,9 @@ setInterval(() => {
             console.log("no existing games");
         } else {
             currentGamesDiv.replaceChildren();
+            console.log("----------------");
             list.forEach(game=>{
-                //se ho creato io una partita non deve mostrarla tra quelle disponibili
                 console.log(game);
-                //svuoto il container dei Games
-                //visualizzo i vari Game
                 if (game.gameName!=gameNameThatIHaveCreated) {
                     section=document.createElement("section");
                     h3=document.createElement("h3");
@@ -70,7 +68,7 @@ deleteGameBtn=document.getElementById("deleteGameBtn");
 createGameBtn.onclick= async ()=>{
     gameNameThatIHaveCreated=gameNameInput.value;
     usernameWithWhichIHaveCreatedANewGame=usernameInput.value;
-    if (await testUsername(false, usernameWithWhichIHaveCreatedANewGame)) {
+    if (await testUsername("", usernameWithWhichIHaveCreatedANewGame)) {
         createGameBtn.disabled=true;
         startGameBtn.disabled=false;
         usernameInput.disabled=true;
@@ -140,31 +138,15 @@ deleteGameBtn.onclick=()=>{
 };
 
 async function testUsername(gameName, nameToBeTested) {
-    //'gameName' usato anche come 'exists' nel contesto di creazione della partita
-    if (typeof gameName === 'boolean') {
-        return fetch(URLPrefix+"testUsername", {
-            method: "POST",
-            headers: {
-                "GameName":"",
-                "Username":nameToBeTested,
-                "Exists":gameName
-            }
-        })
-        .then(response => response.json())
-        .then(isNameOK => {
-            return isNameOK;
-        });
-    } else {
-        return fetch(URLPrefix+"testUsername", {
-            method: "POST",
-            headers: {
-                "GameName":gameName,
-                "Username":nameToBeTested
-            }
-        })
-        .then(response => response.json())
-        .then(isNameOK => {
-            return isNameOK;
-        });
-    }
+    return fetch(URLPrefix+"testUsername", {
+        method: "POST",
+        headers: {
+            "GameName":gameName,
+            "Username":nameToBeTested
+        }
+    })
+    .then(response => response.json())
+    .then(isNameOK => {
+        return isNameOK;
+    });
 }
