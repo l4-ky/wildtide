@@ -67,8 +67,12 @@ gameNameInput=document.getElementById("gameNameInput");
 deleteGameBtn=document.getElementById("deleteGameBtn");
 createGameBtn.onclick= async ()=>{
     gameNameThatIHaveCreated=gameNameInput.value;
+    /* if (gameNameThatIHaveCreated=="") {
+        alert("invalid username");
+        return;
+    } */
     usernameWithWhichIHaveCreatedANewGame=usernameInput.value;
-    if (await testUsername("", usernameWithWhichIHaveCreatedANewGame)) {
+    if (await testUsername(gameNameThatIHaveCreated, usernameWithWhichIHaveCreatedANewGame)) {
         createGameBtn.disabled=true;
         startGameBtn.disabled=false;
         usernameInput.disabled=true;
@@ -91,7 +95,7 @@ createGameBtn.onclick= async ()=>{
             this.clearTimeout(createdGameTimeout);
         });
     } else {
-        alert("Il nome giocatore o partita scelto non è accettabile.Riprova.\n(non può essere vuoto o contentere spazi, ammette solo lettere, cifre o _)");
+        alert("Il nome giocatore o partita scelto non e' accettabile.Riprova.\n(non puo' essere vuoto o contentere spazi, ammette solo lettere, cifre o _)");
     }
 };
 startGameBtn=document.getElementById("startGameBtn");
@@ -107,7 +111,7 @@ startGameBtn.onclick=()=>{
     .then(couldStart => {
         if (couldStart) {
             window.sessionStorage.setItem("gameName",gameNameThatIHaveCreated);
-            window.sessionStorage.setItem("username",tempUsername);
+            window.sessionStorage.setItem("username",usernameInput.value);
             window.location.href="game.html";
         } else {
             alert("Troppi pochi giocatori in coda per la partita, oppure il nome utente non corrisponde a quello del creatore della partita");

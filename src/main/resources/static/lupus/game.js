@@ -14,7 +14,8 @@ fetch(URLPrefix+"canOpenWebsocket", {
 .then(response => response.json())
 .then((canOpenWebsocket) => {
     if (canOpenWebsocket) {
-        socket=new WebSocket(URLPrefix+gameName+"/"+selfUsername);
+        console.log("can open webSocket now.")
+        /* socket=new WebSocket(URLPrefix+gameName+"/"+selfUsername);
         socket.addEventListener("open", (event) => {
             console.log("websocket opened.");
         });
@@ -29,13 +30,13 @@ fetch(URLPrefix+"canOpenWebsocket", {
                 let container=document.getElementById("playersContainer");
                 mess.message.forEach((player) => {
                     if (player.name=selfUsername) {
-                        /* if (player.role=="Villico") //TO DO: set immagini
+                        /* *//* if (player.role=="Villico") //TO DO: set immagini
                         else if (player.role=="Lupo")
                         else if (player.role="Veggente")
                         else if (player.role="Mitomane")
                         else if (player.role="Medium")
                         else if (player.role="Guardia")
-                        else if (player.role="Massone") */
+                        else if (player.role="Massone") */ /*
                     } else {
                         //TO DO: aggiungere le cards per i player
                         card=document.createElement("div");
@@ -54,7 +55,7 @@ fetch(URLPrefix+"canOpenWebsocket", {
                         else if (player.role="Medium")
                         else if (player.role="Guardia")
                         else if (player.role="Massone")
-                        */
+                        */ /*
                         card.appendChild(section);
                         card.appendChild(img);
                         container.appendChild(card);
@@ -64,7 +65,7 @@ fetch(URLPrefix+"canOpenWebsocket", {
                 //TO DO: fixare notifica inizio partita
                 alert("Partita iniziata!\n"+mess.message);
             }
-        });
+        }); */
     } else {
         alert("Partita inesistente o scartata per inattività.\nRitorno automatico alla Home.");
         window.history.back();

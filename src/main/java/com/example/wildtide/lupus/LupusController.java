@@ -28,11 +28,10 @@ public class LupusController {
     public boolean testUsername(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
         Game found=gamesHashMap.get(gameName);
         if (found==null) {
-            return !(
-                (gameName==null || gameName.isEmpty() || gameName.matches(".*[^a-zA-Z0-9_].*") || gameName.contains(" "))
+            return 
+                !(gameName==null || gameName.isEmpty() || gameName.matches(".*[^a-zA-Z0-9_].*"))
                 &&
-                (username==null || username.isEmpty() || username.matches(".*[^a-zA-Z0-9_].*") || username.contains(" "))
-                );
+                !(username==null || username.isEmpty() || username.matches(".*[^a-zA-Z0-9_].*"));
         } else {
             for (String playerName:found.getNamePlayersList()) {
                 if (playerName.equals(username)) return false;
@@ -40,7 +39,7 @@ public class LupusController {
             return !(username==null || username.isEmpty() || username.matches(".*[^a-zA-Z0-9_].*") || username.contains(" "));
         }
     }
-    
+
     @GetMapping("openGames")
     public Collection<Game> getExistingGames() {
         Collection<Game> temp=gamesHashMap.values();
