@@ -14,7 +14,7 @@ public class Game extends Thread{
     //
     private HashMap<String, Player<?>> playersList=new HashMap<String, Player<?>>();
     private BlockingQueue<String> queue=new ArrayBlockingQueue<>(1);
-    private boolean canOpenWebsockets=false;
+    private boolean canStartEmitters=false;
     private boolean hasStarted=false;
     private boolean hasEnded=false;
     private boolean haveLupiWon=false;
@@ -35,23 +35,26 @@ public class Game extends Thread{
 
     //TO DO: polling o similare per controllare che il Game sia 'alive', cioè che non sia una partita fantastma avviata e mai "giocata"
 
-    int openedWebSockets=0;
+    int openedEmitters=0;
     @Override
     public void run(){
         hasStarted=true;
         assignRoles();
-        canOpenWebsockets=true;
+        canStartEmitters=true;
         //TO DO: se il Role incapsulato nel Player non viene usato per metodi aggiuntivi, può essere trasformato in una semplice stringa contenente il ruolo. tutti i riferimenti al Player Role dovranno poi esserea adeguati. (prossibile alleggerimento nelle prestazioni, in quanto elabora stringe e non oggetti, anche con meno chiamate a metodi)
+
         //rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
-        while (openedWebSockets<=playersList.size()) {
+        while (openedEmitters<=playersList.size()) {
             try {
                 queue.take();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            openedWebSockets++;
+            openedEmitters++;
         }
         
+        //TESTARE INVIO DATI + CORRETTA RICEZIONE NEL SITO
+
         //invio info iniziali ai siti
         for (Player<?> player:playersList.values()) {
             player.sendMessage(new ArrayList<>(Arrays.asList(300, "Moderatore", playersList.values())));
@@ -300,27 +303,25 @@ public class Game extends Thread{
         Collections.shuffle(list1);
         //minimo 8 giocatori per iniziare la partita, quindi non serve un if per controllare se eseguire il primo ciclo
         for (Player<?> player:list1) {
-            list1.getLast().setPlayerName(player.getPlayerName());
-            playersList.put(player.getPlayerName(), list1.getLast());
-            namePlayersList.remove(0);
+            player.setPlayerName(namePlayersList.removeLast());
+            playersList.put(player.getPlayerName(), player);
+            if (namePlayersList.isEmpty()) return;//DEBUG, ASSOLUTAMENTE DA TOGLIERE
         }
         if (namePlayersList.isEmpty()) return;
         //
         ArrayList<Player<?>> list2=new ArrayList<Player<?>>(Arrays.asList(new Player<Medium>("", new Medium()), new Player<Villico>("", new Villico()), new Player<Guardia>("", new Guardia()), new Player<Villico>("", new Villico()), new Player<Mitomane>("", new Mitomane()), new Player<Massone>("", new Massone()), new Player<Massone>("", new Massone())));
         Collections.shuffle(list2);
         for (Player<?> player:list2) {
-            list2.getLast().setPlayerName(player.getPlayerName());
-            playersList.put(player.getPlayerName(), list2.getLast());
-            namePlayersList.remove(0);
+            player.setPlayerName(namePlayersList.removeLast());
+            playersList.put(player.getPlayerName(), player);
             if (namePlayersList.isEmpty()) return;
         }
         //
         ArrayList<Player<?>> list3=new ArrayList<Player<?>>(Arrays.asList(new Player<Lupo>("", new Lupo()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Lupo>("", new Lupo()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Lupo>("", new Lupo())));
         Collections.shuffle(list3);
         for (Player<?> player:list3) {
-            list3.getLast().setPlayerName(player.getPlayerName());
-            playersList.put(player.getPlayerName(), list3.getLast());
-            namePlayersList.remove(0);
+            player.setPlayerName(namePlayersList.removeLast());
+            playersList.put(player.getPlayerName(), player);
             if (namePlayersList.isEmpty()) return;
         }
     }
@@ -461,8 +462,8 @@ public class Game extends Thread{
         return queue;
     }
     
-    public boolean getCanOpenWebsockets() {
-        return canOpenWebsockets;
+    public boolean getCanStartEmitters() {
+        return canStartEmitters;
     }
 
     public boolean getHaveLupiWon() {

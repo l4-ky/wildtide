@@ -3,23 +3,18 @@ package com.example.wildtide.lupus;
 import java.util.Collection;
 import java.util.HashMap;
 
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
-import javax.websocket.server.PathParam;
-import javax.websocket.server.ServerEndpoint;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/lupus/")
-@ServerEndpoint("/lupus/{gameName}/{username}")
 public class LupusController {
     private HashMap<String, Game> gamesHashMap=new HashMap<String, Game>();
 
@@ -62,18 +57,19 @@ public class LupusController {
             }
         }).start();
     }
-    
+
     @PostMapping("enterGame")
     public boolean enterGame(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
         Game foundGame=gamesHashMap.get(gameName);
         if (foundGame==null || foundGame.hasStarted()) return false;
         return foundGame.addPlayer(username);
     }
-    
+
     @PostMapping("startGame")
     public boolean startGame(@RequestHeader("gameName") String gameName, @RequestHeader("Username") String username) {
         Game askedToStart=gamesHashMap.get(gameName);
-        if (askedToStart.getWhoCreated().equals(username) && askedToStart.getNamePlayersList().size()>=8) {
+        //ASSOLUTAMENTE DA DECOMMENTARE IL CONTROLLO DEL NUMERO DI GIOCATORI, qui sotto
+        if (askedToStart.getWhoCreated().equals(username) /* && askedToStart.getNamePlayersList().size()>=8 */) {
             askedToStart.start();
             return true;
         } else {
@@ -98,39 +94,23 @@ public class LupusController {
         Game foundGame=gamesHashMap.get(gameName);
         //non dovrebbe poter essere 'null' perchè il sito arriva a chiamare questo metodo quando ha già aperto la nuova pagina clickando sul bottone generato, quindi è QUASI sicuro che in Game esista (però potrebbe essere scaduto nell'istante in cui stava entrando)
         if (foundGame==null) return false;
-        while (!foundGame.getCanOpenWebsockets()) {
+        while (!foundGame.getCanStartEmitters()) {
             //do absolutely nothing, i'm waiting for approval to allow the client to open the Websocket
         }
         return true;
     }
 
-    @OnOpen
-    public boolean onOpen(Session session, @PathParam("gameName") String gameName, @PathParam("username") String username) {
-        Game gameFound=gamesHashMap.get(gameName);
-        if (gameFound!=null) {
-            Player<?> playerFound=gameFound.getPlayersList().get(username);
-            if (playerFound!=null) {
-                playerFound.setSession(session);
-                //aggiungo alla queue un placeholder per indicare che la websocket è aperta e connessa. (vedi inizio Game-run())
-                //non serve indicare playerName o altre informazioni
-                try {
-                    gameFound.getQueue().put("");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        } 
+    @GetMapping("/sse")
+    public SseEmitter openNewEmitter(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
+        SseEmitter newEmitter=new SseEmitter();
+        gamesHashMap.get(gameName).getPlayersList().get(username).setEmitter(newEmitter);
+        return newEmitter;
     }
     //END OF PREP METHODS
     
     //IN-GAME METHODS
     @PutMapping("choice/{gameName}")
-    public void guardiaChoice(@PathParam("gameName") String gameName, @RequestBody String chosenPlayer) {
+    public void guardiaChoice(@RequestHeader("GameName") String gameName, @RequestBody String chosenPlayer) {
         try {
             gamesHashMap.get(gameName).getQueue().put(chosenPlayer);
         } catch (InterruptedException e) {
@@ -185,7 +165,7 @@ public class LupusController {
     } */
 
     @PostMapping("chat/{gameName}/{toRole}")
-    public void redirectMessage(@PathParam("gameName") String gameName, @PathParam("toRole") String toRole, @RequestHeader("Username") String senderName, @RequestBody String messageReceived) {
+    public void redirectMessage(@RequestHeader("GameName") String gameName, @RequestHeader("toRole") String toRole, @RequestHeader("Username") String senderName, @RequestBody String messageReceived) {
         gamesHashMap.get(gameName).redirect(toRole, senderName, messageReceived);
 	}
     //END OF IN-GAME METHODS

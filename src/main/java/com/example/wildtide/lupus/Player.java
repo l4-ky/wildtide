@@ -1,13 +1,14 @@
 package com.example.wildtide.lupus;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.websocket.Session;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 public class Player<Role> {
     //session got from the WebSocket connection
     //used for back-->site comunication
-    private Session session;
+    private SseEmitter emitter;
     private String name;
     private Role role;
     private boolean isProtected;
@@ -21,7 +22,7 @@ public class Player<Role> {
         this.role=role;
     }
     public Player(Player<?> oldPlayer, Role newRole) {
-        this.session=oldPlayer.session;
+        this.emitter=oldPlayer.emitter;
         this.name=oldPlayer.name;
         this.role=newRole;//tutto uguale, tranne che non copio il ruolo ma utilizzo il parametro
         this.isProtected=oldPlayer.isProtected;
@@ -32,11 +33,15 @@ public class Player<Role> {
 
     @SuppressWarnings("rawtypes")//just because
     public void sendMessage(ArrayList toBeSent) {
-        session.getAsyncRemote().sendObject(toBeSent);
+        try {
+            emitter.send(toBeSent);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void setSession(Session session) {
-        this.session=session;
+    public void setEmitter(SseEmitter emitter) {
+        this.emitter=emitter;
     }
 
     public String getPlayerName() {
@@ -91,7 +96,7 @@ public class Player<Role> {
     @Override
     public String toString() {
         return "Player{" +
-                "session=" + session +
+                "emitter=" + emitter +
                 ", name='" + name + '\'' +
                 ", role=" + role +
                 ", isProtected=" + isProtected +

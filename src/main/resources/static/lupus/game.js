@@ -6,7 +6,7 @@ gameNameP.innerHTML=gameName;
 selfUsernameP=document.getElementById("selfUsername");
 selfUsernameP.innerHTML=selfUsername;
 
-let socket;
+let emitter;
 fetch(URLPrefix+"canOpenWebsocket", {
     method: "GET",
     headers: {"GameName":gameName}
@@ -14,8 +14,17 @@ fetch(URLPrefix+"canOpenWebsocket", {
 .then(response => response.json())
 .then((canOpenWebsocket) => {
     if (canOpenWebsocket) {
-        //TESTARE APERTURA SOCKET
-        socket=new WebSocket(URLPrefix+gameName+"/"+selfUsername);
+        fetch(URLPrefix+"/sse", {
+            method: "GET",
+            headers: {
+                'GameName':gameName,
+                'Username': selfUsername
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);//TO TEST
+        });
         socket.addEventListener("open", (event) => {
             console.log("websocket opened.");
         });
