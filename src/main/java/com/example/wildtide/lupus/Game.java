@@ -300,9 +300,8 @@ public class Game extends Thread{
         Collections.shuffle(list1);
         //minimo 8 giocatori per iniziare la partita, quindi non serve un if per controllare se eseguire il primo ciclo
         for (Player<?> player:list1) {
-            list1.getFirst().setPlayerName(player.getPlayerName());
-            playersList.put(player.getPlayerName(), list1.getFirst());
-            list1.remove(0);
+            list1.getLast().setPlayerName(player.getPlayerName());
+            playersList.put(player.getPlayerName(), list1.getLast());
             namePlayersList.remove(0);
         }
         if (namePlayersList.isEmpty()) return;
@@ -310,9 +309,8 @@ public class Game extends Thread{
         ArrayList<Player<?>> list2=new ArrayList<Player<?>>(Arrays.asList(new Player<Medium>("", new Medium()), new Player<Villico>("", new Villico()), new Player<Guardia>("", new Guardia()), new Player<Villico>("", new Villico()), new Player<Mitomane>("", new Mitomane()), new Player<Massone>("", new Massone()), new Player<Massone>("", new Massone())));
         Collections.shuffle(list2);
         for (Player<?> player:list2) {
-            list2.getFirst().setPlayerName(player.getPlayerName());
-            playersList.put(player.getPlayerName(), list2.getFirst());
-            list2.remove(0);
+            list2.getLast().setPlayerName(player.getPlayerName());
+            playersList.put(player.getPlayerName(), list2.getLast());
             namePlayersList.remove(0);
             if (namePlayersList.isEmpty()) return;
         }
@@ -320,9 +318,8 @@ public class Game extends Thread{
         ArrayList<Player<?>> list3=new ArrayList<Player<?>>(Arrays.asList(new Player<Lupo>("", new Lupo()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Lupo>("", new Lupo()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Lupo>("", new Lupo())));
         Collections.shuffle(list3);
         for (Player<?> player:list3) {
-            list3.getFirst().setPlayerName(player.getPlayerName());
-            playersList.put(player.getPlayerName(), list3.getFirst());
-            list3.remove(0);
+            list3.getLast().setPlayerName(player.getPlayerName());
+            playersList.put(player.getPlayerName(), list3.getLast());
             namePlayersList.remove(0);
             if (namePlayersList.isEmpty()) return;
         }
