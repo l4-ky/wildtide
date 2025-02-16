@@ -1,15 +1,17 @@
 package com.example.wildtide.lupus;
-
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -80,7 +82,7 @@ public class LupusController {
     @DeleteMapping("discardGame")
     public boolean discardGame(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
         Game toDiscard=gamesHashMap.get(gameName);
-        if (toDiscard.getWhoCreated().equals(username) && !toDiscard.hasStarted()) {
+        if (toDiscard!=null && toDiscard.getWhoCreated().equals(username) && !toDiscard.hasStarted()) {
             toDiscard.disposeOfGame();
             gamesHashMap.remove(gameName);
             return true;
@@ -100,12 +102,53 @@ public class LupusController {
         return true;
     }
 
-    @GetMapping("/sse")
-    public SseEmitter openNewEmitter(@RequestHeader("GameName") String gameName, @RequestHeader("Username") String username) {
-        SseEmitter newEmitter=new SseEmitter();
-        gamesHashMap.get(gameName).getPlayersList().get(username).setEmitter(newEmitter);
+    @GetMapping("/sse/{gameName}/{username}")
+    //@GetMapping("/sse")
+    public SseEmitter openNewEmitter(@PathVariable("gameName") String gameName, @PathVariable("username") String username) {
+        SseEmitter newEmitter=new SseEmitter(Long.MAX_VALUE);
+        System.out.println(gameName+" - "+username);
+        try {
+            newEmitter.send(SseEmitter.event().name("INIT"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //PERCHE' QUA NON TROVA IL GAME O IL PLAYER ???
+        Game foundGame=gamesHashMap.get(gameName);
+        System.out.println(foundGame);
+        if (foundGame==null) return null;
+        Player<?> foundPlayer=foundGame.getPlayersList().get(username);
+        System.out.println(foundPlayer);
+        if (foundPlayer==null) return null;
+        foundPlayer.setEmitter(newEmitter);
         return newEmitter;
     }
+
+    /* @GetMapping(value = "/sse/{gameName}/{username}", produces = "text/event-stream")
+    public void streamEvents(HttpServletResponse response, @PathParam("gameName") String gameName, @PathParam("username") String username) throws IOException {
+        response.setContentType("text/event-stream");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+        ///
+        SseEmitter newEmitter=new SseEmitter(Long.MAX_VALUE);
+        Game foundGame=gamesHashMap.get(gameName);
+        System.out.println(foundGame);
+        if (foundGame==null) {
+            out.write(new Gson().toJson(null));
+            out.flush();
+            return;
+        }
+        Player<?> foundPlayer=foundGame.getPlayersList().get(username);
+        System.out.println(foundPlayer);
+        if (foundPlayer==null) {
+            out.write(new Gson().toJson(null));
+            out.flush();
+            return;
+        }
+        foundPlayer.setEmitter(newEmitter);
+        out.write(new Gson().toJson(newEmitter));
+        out.flush();
+        out.close();
+    } */
     //END OF PREP METHODS
     
     //IN-GAME METHODS

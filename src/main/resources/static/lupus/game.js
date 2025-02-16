@@ -1,12 +1,13 @@
-const URLPrefix="/lupus/";
 const selfUsername=window.sessionStorage.getItem("username");
 const gameName=window.sessionStorage.getItem("gameName");
+const URLPrefix="/lupus/";
+const SseUrl=URLPrefix+"sse/"+gameName+"/"+selfUsername;
 gameNameP=document.getElementById("gameName");
 gameNameP.innerHTML=gameName;
 selfUsernameP=document.getElementById("selfUsername");
 selfUsernameP.innerHTML=selfUsername;
+let eventSource;
 
-let emitter;
 fetch(URLPrefix+"canOpenWebsocket", {
     method: "GET",
     headers: {"GameName":gameName}
@@ -14,21 +15,12 @@ fetch(URLPrefix+"canOpenWebsocket", {
 .then(response => response.json())
 .then((canOpenWebsocket) => {
     if (canOpenWebsocket) {
-        fetch(URLPrefix+"/sse", {
-            method: "GET",
-            headers: {
-                'GameName':gameName,
-                'Username': selfUsername
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);//TO TEST
+        eventSource=new EventSource(SseUrl);
+        //eventSource=new EventSource(URLPrefix+"sse");
+        eventSource.addEventListener("gameUpdate",(event)=>{
+            console.log(event.data);
         });
-        socket.addEventListener("open", (event) => {
-            console.log("websocket opened.");
-        });
-        socket.addEventListener("message", (event) => {
+        /* socket.addEventListener("message", (event) => {
             //TO DO: ricavare messaggio;
             console.log(event.data);
             //
@@ -39,13 +31,13 @@ fetch(URLPrefix+"canOpenWebsocket", {
                 let container=document.getElementById("playersContainer");
                 mess.message.forEach((player) => {
                     if (player.name=selfUsername) {
-                        /* if (player.role=="Villico") //TO DO: set immagini
+                        if (player.role=="Villico") //TO DO: set immagini
                         else if (player.role=="Lupo")
                         else if (player.role="Veggente")
                         else if (player.role="Mitomane")
                         else if (player.role="Medium")
                         else if (player.role="Guardia")
-                        else if (player.role="Massone") */
+                        else if (player.role="Massone")
                     } else {
                         //TO DO: aggiungere le cards per i player
                         card=document.createElement("div");
@@ -56,13 +48,13 @@ fetch(URLPrefix+"canOpenWebsocket", {
                         h5.id=player.name;//same
                         section.appendChild(h5);
                         img=document.createElement("img");
-                        /* if (player.role=="Villico") //TO DO: set immagini
+                        if (player.role=="Villico") //TO DO: set immagini
                         else if (player.role=="Lupo")
                         else if (player.role="Veggente")
                         else if (player.role="Mitomane")
                         else if (player.role="Medium")
                         else if (player.role="Guardia")
-                        else if (player.role="Massone") */
+                        else if (player.role="Massone")
                         card.appendChild(section);
                         card.appendChild(img);
                         container.appendChild(card);
@@ -72,7 +64,7 @@ fetch(URLPrefix+"canOpenWebsocket", {
                 //TO DO: fixare notifica inizio partita
                 alert("Partita iniziata!\n"+mess.message);
             }
-        });
+        }); */
     } else {
         alert("Partita inesistente o scartata per inattività.\nRitorno automatico alla Home.");
         window.history.back();

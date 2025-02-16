@@ -44,19 +44,23 @@ public class Game extends Thread{
         //TO DO: se il Role incapsulato nel Player non viene usato per metodi aggiuntivi, può essere trasformato in una semplice stringa contenente il ruolo. tutti i riferimenti al Player Role dovranno poi esserea adeguati. (prossibile alleggerimento nelle prestazioni, in quanto elabora stringe e non oggetti, anche con meno chiamate a metodi)
 
         //rendevous per aspettare che tutti i Player abbiano aperto e collegato la WebSocket
-        while (openedEmitters<=playersList.size()) {
+        while (openedEmitters<playersList.size()) {
+            System.out.println("waiting.. ("+openedEmitters+")");
             try {
                 queue.take();
+                System.out.println("TOOK ONE");
+                openedEmitters++;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            openedEmitters++;
         }
         
         //TESTARE INVIO DATI + CORRETTA RICEZIONE NEL SITO
-
+        System.out.println("Here");
+        
         //invio info iniziali ai siti
         for (Player<?> player:playersList.values()) {
+            System.out.println("Here with "+player);
             player.sendMessage(new ArrayList<>(Arrays.asList(300, "Moderatore", playersList.values())));
         }
         
