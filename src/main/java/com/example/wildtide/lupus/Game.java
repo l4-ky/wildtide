@@ -78,7 +78,7 @@ public class Game extends Thread{
             //se quella persona è poi scelta anche dai lupi mannari come vittima, non muore e nella fase della notte nessuno è sbranato.
             if (numeroNotte>1) {
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
-                Player<Guardia> guardia=(Player<Guardia>)getOfRole("Guardia").getFirst();
+                Player<Guardia> guardia=(Player<Guardia>)getOfRole("Guardia").get(0);
                 if (guardia!=null) {
                     messageTo(playersList, "Guardia del corpo, apri gli occhi!\nChi vuoi proteggere questa notte?");
                     try {
@@ -165,7 +165,7 @@ public class Game extends Thread{
             //“sì” se la persona linciata nel turno precedente era un lupo mannaro, “no” altrimenti.
             if (numeroNotte>1) {
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
-                Player<Medium> medium=(Player<Medium>)getOfRole("Medium").getFirst();
+                Player<Medium> medium=(Player<Medium>)getOfRole("Medium").get(0);
                 if (medium!=null) {
                     messageTo(playersList, "Medium, apri gli occhi!");
                     Player<?> killedLastNight=whoWaskilledLastNight(numeroNotte);
@@ -185,7 +185,7 @@ public class Game extends Thread{
             if (numeroNotte==2 || mitomaneHasSecondChance) {
                 mitomaneHasSecondChance=false;
                 @SuppressWarnings("unchecked")//mi dava fastidio il warning. se trova la guardia è safe, se non la trova non esegue il pezzo di codice di competenza
-                Player<Mitomane> mitomane=(Player<Mitomane>)getOfRole("Mitomane").getFirst();
+                Player<Mitomane> mitomane=(Player<Mitomane>)getOfRole("Mitomane").get(0);
                 if (mitomane!=null) {
                     messageTo(playersList, "Mitomane, apri gli occhi!");
                     try {
@@ -307,7 +307,7 @@ public class Game extends Thread{
         Collections.shuffle(list1);
         //minimo 8 giocatori per iniziare la partita, quindi non serve un if per controllare se eseguire il primo ciclo
         for (Player<?> player:list1) {
-            player.setPlayerName(namePlayersList.removeLast());
+            player.setPlayerName(namePlayersList.remove(namePlayersList.size()-1));
             playersList.put(player.getPlayerName(), player);
             if (namePlayersList.isEmpty()) return;//DEBUG, ASSOLUTAMENTE DA TOGLIERE
         }
@@ -316,7 +316,7 @@ public class Game extends Thread{
         ArrayList<Player<?>> list2=new ArrayList<Player<?>>(Arrays.asList(new Player<Medium>("", new Medium()), new Player<Villico>("", new Villico()), new Player<Guardia>("", new Guardia()), new Player<Villico>("", new Villico()), new Player<Mitomane>("", new Mitomane()), new Player<Massone>("", new Massone()), new Player<Massone>("", new Massone())));
         Collections.shuffle(list2);
         for (Player<?> player:list2) {
-            player.setPlayerName(namePlayersList.removeLast());
+            player.setPlayerName(namePlayersList.remove(namePlayersList.size()-1));
             playersList.put(player.getPlayerName(), player);
             if (namePlayersList.isEmpty()) return;
         }
@@ -324,7 +324,7 @@ public class Game extends Thread{
         ArrayList<Player<?>> list3=new ArrayList<Player<?>>(Arrays.asList(new Player<Lupo>("", new Lupo()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Lupo>("", new Lupo()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Villico>("", new Villico()), new Player<Lupo>("", new Lupo())));
         Collections.shuffle(list3);
         for (Player<?> player:list3) {
-            player.setPlayerName(namePlayersList.removeLast());
+            player.setPlayerName(namePlayersList.remove(namePlayersList.size()-1));
             playersList.put(player.getPlayerName(), player);
             if (namePlayersList.isEmpty()) return;
         }
@@ -452,7 +452,7 @@ public class Game extends Thread{
     }
 
     public String getWhoCreated() {
-        return namePlayersList.getFirst();
+        return namePlayersList.get(0);
     }
 
     public ArrayList<String> getNamePlayersList() {
